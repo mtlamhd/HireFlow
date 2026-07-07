@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\HireFlow.Domain\HireFlow.Domain.csproj" />
+    </ItemGroup>
+
 </Project>

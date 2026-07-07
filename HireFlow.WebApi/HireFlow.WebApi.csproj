@@ -19,4 +19,10 @@
       <Folder Include="Controllers\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\HireFlow.Domain\HireFlow.Domain.csproj" />
+      <ProjectReference Include="..\HireFlow.Infrustructure\HireFlow.Infrustructure.csproj" />
+      <ProjectReference Include="..\HireFlow.Service\HireFlow.Service.csproj" />
+    </ItemGroup>
+
 </Project>
