@@ -1,7 +1,6 @@
 namespace HireFlow.Domain.Abstractions;
 
-
-    public abstract class BaseEntity
+    public abstract class BaseEntity 
     {
         public Guid Id { get; protected set; } = Guid.NewGuid();
 
