@@ -23,11 +23,11 @@ public class UserModelBuilderConfiguration : IEntityTypeConfiguration<User>
         builder.HasOne(u => u.ProfileImage)
             .WithMany()
             .HasForeignKey(u => u.ProfileImageId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(u => u.Resume)
             .WithMany()
             .HasForeignKey(u => u.ResumeId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

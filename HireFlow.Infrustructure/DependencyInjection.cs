@@ -15,7 +15,7 @@ public static class DependencyInjection
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
-
+            
         return services;
     }
 }
