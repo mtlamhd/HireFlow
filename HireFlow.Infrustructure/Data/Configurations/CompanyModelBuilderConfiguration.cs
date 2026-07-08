@@ -41,5 +41,8 @@ public class CompanyModelBuilderConfiguration : BaseModelBuilderConfiguration<Co
             .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.HasIndex(c => c.Name);
+
+        modelBuilder.HasIndex(c => c.Email)
+            .IsUnique();
     }
 }
