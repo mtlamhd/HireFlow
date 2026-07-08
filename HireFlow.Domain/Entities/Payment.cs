@@ -9,7 +9,7 @@ public class Payment : BaseEntity, IValidatableEntity
 {
     public Guid CompanyId { get; private set; }
     public Company Company { get; private set; } = default!;
-
+    
     public Guid JobAdId { get; private set; }
     public JobAd JobAd { get; private set; } = default!;
 
