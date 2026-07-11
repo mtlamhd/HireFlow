@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HireFlow.Infrustructure.Data;
 
-public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+public class AppDbContext : IdentityDbContext<User, Role , Guid>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {

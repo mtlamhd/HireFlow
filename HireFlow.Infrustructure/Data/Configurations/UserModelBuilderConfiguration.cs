@@ -8,18 +8,8 @@ public class UserModelBuilderConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.Property(u => u.FirstName)
-            .HasMaxLength(100);
-
-        builder.Property(u => u.LastName)
-            .HasMaxLength(100);
-
-        builder.Property(u => u.NationalId)
-            .HasMaxLength(20);
-
-        builder.Property(u => u.BirthDate)
-            .IsRequired(false);
-
+        
+        
         builder.HasOne(u => u.ProfileImage)
             .WithMany()
             .HasForeignKey(u => u.ProfileImageId)
@@ -29,5 +19,46 @@ public class UserModelBuilderConfiguration : IEntityTypeConfiguration<User>
             .WithMany()
             .HasForeignKey(u => u.ResumeId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+       builder.HasOne(x => x.Creator)
+            .WithMany()
+            .HasForeignKey(x => x.CreatedById)
+            .OnDelete(DeleteBehavior.NoAction);
+
+       builder.HasOne(x => x.Modifier)
+            .WithMany()
+            .HasForeignKey(x => x.ModifiedById)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasOne(x => x.Deleter)
+            .WithMany()
+            .HasForeignKey(x => x.DeletedById)
+            .OnDelete(DeleteBehavior.NoAction);
+        
+        builder.HasIndex(u => u.NationalId)
+            .IsUnique();
+        
+        builder.HasIndex(x => x.CreatedAt);
+        
+        builder.HasQueryFilter(e => !e.IsDeleted);
+        
+        builder.Property(x => x.FirstName)
+            .HasMaxLength(100)
+            .IsRequired(false);
+
+        builder.Property(x => x.LastName)
+            .HasMaxLength(100)
+            .IsRequired(false);
+
+        builder.Property(x => x.NationalId)
+            .HasMaxLength(10)
+            .IsRequired(false);
+
+        builder.Property(x => x.BirthDate)
+            .IsRequired(false);
+
+        builder.Property(x => x.IsActive)
+            .HasDefaultValue(true);
+        
     }
 }
