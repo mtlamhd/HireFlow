@@ -42,6 +42,8 @@ public sealed class User : IdentityUser<Guid>, IValidatableEntity
 
     public ICollection<Notification> Notifications { get; private set; } = new List<Notification>();
 
+    public ICollection<UserSkill> UserSkills { get; private set; }
+        = new List<UserSkill>();
     private User()
     {
     }

@@ -10,6 +10,9 @@ public class Skill : BaseEntity, IValidatableEntity
 
     
     public ICollection<JobAdSkill> JobAdSkills { get; private set; } = new List<JobAdSkill>();
+    
+    public ICollection<UserSkill> UserSkills { get; private set; }
+        = new List<UserSkill>();
 
     private Skill() { }
 
