@@ -1,17 +1,30 @@
 using HireFlow.Domain.Exceptions;
+using HireFlow.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace HireFlow.Domain.Entities;
 
-public class User : IdentityUser<Guid>
+public sealed class User : IdentityUser<Guid>, IValidatableEntity
 {
     public string? FirstName { get; private set; }
     public string? LastName { get; private set; }
 
     public bool IsActive { get; private set; } = true;
 
-    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; private set; }
+    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+
+    public Guid? CreatedById { get; private set; }
+    public User? Creator { get; private set; }
+
+    public DateTime? ModifiedAt { get; private set; }
+    public Guid? ModifiedById { get; private set; }
+    public User? Modifier { get; private set; }
+
+    public DateTime? DeletedAt { get; private set; }
+    public Guid? DeletedById { get; private set; }
+    public User? Deleter { get; private set; }
+
+    public bool IsDeleted { get; private set; }
 
     public Guid? ProfileImageId { get; private set; }
     public Attachment? ProfileImage { get; private set; }
@@ -20,83 +33,106 @@ public class User : IdentityUser<Guid>
     public Attachment? Resume { get; private set; }
 
     public DateTime? BirthDate { get; private set; }
+
     public string? NationalId { get; private set; }
 
     public ICollection<Company> Companies { get; private set; } = new List<Company>();
+
     public ICollection<Request> Requests { get; private set; } = new List<Request>();
 
+    public ICollection<Notification> Notifications { get; private set; } = new List<Notification>();
 
-    private User() { }
+    private User()
+    {
+    }
 
-    // ✅ Profile
-    public void UpdateProfile(string? firstName, string? lastName)
+    public User(
+        string phoneNumber,
+        Guid? requesterId = null)
+    {
+        Id = new SequentialGuid.SequentialGuid();
+
+        PhoneNumber = phoneNumber;
+        UserName = phoneNumber;
+
+        CreatedById = requesterId ?? Id;
+
+        Validate();
+    }
+
+    public void UpdateProfile(
+        string firstName,
+        string lastName,
+        Guid requesterId)
     {
         FirstName = firstName;
         LastName = lastName;
-        UpdatedAt = DateTime.UtcNow;
+
+        Validate();
+        SetModificationInfo(requesterId);
     }
 
-    // ✅ National Info
-    public void SetNationalInfo(string? nationalId, DateTime? birthDate)
+    public void CompletePersonalInfo(
+        string nationalId,
+        DateTime birthDate,
+        Guid requesterId)
     {
-        if (!string.IsNullOrWhiteSpace(nationalId))
-        {
-            if (nationalId.Length != 10 || !nationalId.All(char.IsDigit))
-                throw new ValidationException(
-                    "NationalId must be 10 digits.",
-                    6001);
-        }
-
-        if (birthDate.HasValue && birthDate > DateTime.UtcNow)
-            throw new ValidationException(
-                "BirthDate cannot be in the future.",
-                6002);
-
         NationalId = nationalId;
         BirthDate = birthDate;
-        UpdatedAt = DateTime.UtcNow;
+
+        Validate();
+
+        SetModificationInfo(requesterId);
     }
 
-   
-    public void SetProfileImage(Guid attachmentId)
+    public void SetProfileImage(Guid attachmentId, Guid requesterId)
     {
         ProfileImageId = attachmentId;
-        UpdatedAt = DateTime.UtcNow;
+
+        SetModificationInfo(requesterId);
     }
 
-    public void RemoveProfileImage()
+    public void RemoveProfileImage(Guid requesterId)
     {
         ProfileImageId = null;
-        UpdatedAt = DateTime.UtcNow;
+
+        SetModificationInfo(requesterId);
     }
 
-    
-    public void SetResume(Guid attachmentId)
+    public void SetResume(Guid attachmentId, Guid requesterId)
     {
         ResumeId = attachmentId;
-        UpdatedAt = DateTime.UtcNow;
+
+        SetModificationInfo(requesterId);
     }
 
-    public void RemoveResume()
+    public void RemoveResume(Guid requesterId)
     {
         ResumeId = null;
-        UpdatedAt = DateTime.UtcNow;
+
+        SetModificationInfo(requesterId);
     }
 
-   
-    public void Deactivate()
+    public void Activate(Guid requesterId)
     {
-        IsActive = false;
-        UpdatedAt = DateTime.UtcNow;
-    }
+        if (IsActive)
+            return;
 
-    public void Activate()
-    {
         IsActive = true;
-        UpdatedAt = DateTime.UtcNow;
+
+        SetModificationInfo(requesterId);
     }
 
-   
+    public void Deactivate(Guid requesterId)
+    {
+        if (!IsActive)
+            return;
+
+        IsActive = false;
+
+        SetModificationInfo(requesterId);
+    }
+
     public int? GetAge()
     {
         if (!BirthDate.HasValue)
@@ -109,5 +145,51 @@ public class User : IdentityUser<Guid>
             age--;
 
         return age;
+    }
+
+    public void SetModificationInfo(Guid requesterId)
+    {
+        ModifiedAt = DateTime.UtcNow;
+        ModifiedById = requesterId;
+    }
+
+    public void SetAsDeleted(Guid requesterId)
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        DeletedById = requesterId;
+
+        SetModificationInfo(requesterId);
+    }
+
+    public void Validate()
+    {
+        if (string.IsNullOrWhiteSpace(PhoneNumber))
+            throw new ValidationException(
+                "Phone number is required.",
+                6001);
+
+        if (!string.IsNullOrWhiteSpace(NationalId))
+        {
+            if (NationalId.Length != 10 || !NationalId.All(char.IsDigit))
+                throw new ValidationException(
+                    "NationalId must be 10 digits.",
+                    6002);
+        }
+
+        if (BirthDate.HasValue &&
+            BirthDate.Value.Date > DateTime.UtcNow.Date)
+            throw new ValidationException(
+                "Birth date cannot be in the future.",
+                6003);
+        if (string.IsNullOrWhiteSpace(FirstName))
+            throw new ValidationException(
+                "First name is required.",
+                6004);
+
+        if (string.IsNullOrWhiteSpace(LastName))
+            throw new ValidationException(
+                "Last name is required.",
+                6005);
     }
 }

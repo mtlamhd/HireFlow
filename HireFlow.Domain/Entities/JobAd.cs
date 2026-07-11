@@ -1,4 +1,5 @@
 using HireFlow.Domain.Abstractions;
+using HireFlow.Domain.Enums;
 using HireFlow.Domain.Exceptions;
 using HireFlow.Domain.Interfaces;
 
@@ -10,8 +11,9 @@ public class JobAd : BaseEntity, IValidatableEntity
 
     public string Description { get; private set; }
 
-    public string Location { get; private set; }
-
+    public Guid CityId { get; private set; }
+    
+    public City City { get; private set; }
     public decimal? Salary { get; private set; }
 
     public DateTime ExpireAt { get; private set; }
@@ -21,10 +23,17 @@ public class JobAd : BaseEntity, IValidatableEntity
     public Guid CompanyId { get; private set; }
 
     public Company Company { get; private set; } = default!;
+    
+    public ICollection<JobAdSkill> JobAdSkills { get; private set; } = new List<JobAdSkill>();
 
+    public EmploymentTypeEnum EmploymentType { get; private set; }
     public DateTime? HighlightExpireAt { get; private set; }
 
     public ICollection<Request> Requests { get; private set; } = new List<Request>();
+    
+    public Guid CategoryId { get; private set; }
+
+    public Category Category { get; private set; }
 
 
     private JobAd() { }
@@ -33,17 +42,21 @@ public class JobAd : BaseEntity, IValidatableEntity
     public JobAd(
         string title,
         string description,
-        string location,
+        Guid cityId,
+        Guid categoryId,
         Guid companyId,
         DateTime expireAt,
+        EmploymentTypeEnum employmentType,
         decimal? salary = null)
     {
         Title = title;
         Description = description;
-        Location = location;
+        CityId = cityId;
+        CategoryId = categoryId;
         CompanyId = companyId;
         Salary = salary;
         ExpireAt = expireAt;
+        EmploymentType = employmentType;
 
         Validate();
     }
@@ -52,33 +65,39 @@ public class JobAd : BaseEntity, IValidatableEntity
     public void UpdateInfo(
         string title,
         string description,
-        string location,
-        decimal? salary)
+        Guid cityId,
+        Guid categoryId,
+        EmploymentTypeEnum employmentType,
+        decimal? salary,
+        Guid requesterId)
     {
         Title = title;
         Description = description;
-        Location = location;
+        CityId = cityId;
+        CategoryId = categoryId;
+        EmploymentType = employmentType;
         Salary = salary;
 
         Validate();
-        SetUpdated();
+
+        SetModificationInfo(requesterId);
     }
 
 
-    public void Deactivate()
+    public void Deactivate(Guid requesterId)
     {
         if (!IsActive)
             return;
 
         IsActive = false;
-        SetUpdated();
+        SetModificationInfo(requesterId);
     }
 
 
-    public void SetHighlightUntil(DateTime expireAt)
+    public void SetHighlightUntil(DateTime expireAt,Guid requesterId)
     {
         HighlightExpireAt = expireAt;
-        SetUpdated();
+        SetModificationInfo(requesterId);
     }
 
 
@@ -111,11 +130,7 @@ public class JobAd : BaseEntity, IValidatableEntity
             throw new ValidationException(
                 "Job description is required.",
                 3003);
-
-        if (string.IsNullOrWhiteSpace(Location))
-            throw new ValidationException(
-                "Job location is required.",
-                3004);
+        
 
         if (CompanyId == Guid.Empty)
             throw new ValidationException(
@@ -131,5 +146,10 @@ public class JobAd : BaseEntity, IValidatableEntity
             throw new ValidationException(
                 "Expire date must be greater than creation date.",
                 3007);
+        
+        if (CityId == Guid.Empty)
+            throw new ValidationException(
+                "Job must belong to a city.",
+                3008);
     }
 }

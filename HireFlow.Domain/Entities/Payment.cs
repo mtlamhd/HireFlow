@@ -28,16 +28,16 @@ public class Payment : BaseEntity, IValidatableEntity
         Validate();
     }
 
-    public void MarkAsSuccessful()
+    public void MarkAsSuccessful(Guid requesterId)
     {
         Status = PaymentStatusEnum.Successful;
-        SetUpdated();
+        SetModificationInfo(requesterId);
     }
 
-    public void MarkAsFailed()
+    public void MarkAsFailed(Guid requesterId)
     {
         Status = PaymentStatusEnum.Failed;
-        SetUpdated();
+        SetModificationInfo(requesterId);
     }
 
     public void Validate()

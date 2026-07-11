@@ -29,7 +29,7 @@ public class Request : BaseEntity, IValidatableEntity
     private Request() { }
 
 
-    public void MoveToUnderReview()
+    public void MoveToUnderReview(Guid requesterId)
     {
         
         if (Status != RequestStatusEnum.Initial)
@@ -38,11 +38,11 @@ public class Request : BaseEntity, IValidatableEntity
                 4004);
 
         Status = RequestStatusEnum.UnderReview;
-        SetUpdated();
+        SetModificationInfo(requesterId);
     }
 
 
-    public void MoveToInterview()
+    public void MoveToInterview(Guid requesterId)
     {
         if (Status != RequestStatusEnum.UnderReview)
             throw new BusinessRuleException(
@@ -50,11 +50,11 @@ public class Request : BaseEntity, IValidatableEntity
                 4006);
 
         Status = RequestStatusEnum.Interview;
-        SetUpdated();
+        SetModificationInfo(requesterId);
     }
 
 
-    public void Accept()
+    public void Accept(Guid requesterId)
     {
         if (Status != RequestStatusEnum.UnderReview &&
             Status != RequestStatusEnum.Interview)
@@ -63,12 +63,12 @@ public class Request : BaseEntity, IValidatableEntity
                 4005);
 
         Status = RequestStatusEnum.Accepted;
-        SetUpdated();
+        SetModificationInfo(requesterId);
 
     }
 
 
-    public void Reject()
+    public void Reject(Guid requesterId)
     {
         if (Status != RequestStatusEnum.UnderReview &&
             Status != RequestStatusEnum.Interview)
@@ -77,11 +77,11 @@ public class Request : BaseEntity, IValidatableEntity
                 4007);
 
         Status = RequestStatusEnum.Rejected;
-        SetUpdated();
+        SetModificationInfo(requesterId);
     }
 
 
-    public void Cancel()
+    public void Cancel(Guid requesterId)
     {
         if (Status != RequestStatusEnum.Initial)
             throw new BusinessRuleException(
@@ -89,7 +89,7 @@ public class Request : BaseEntity, IValidatableEntity
                 4003);
 
         Status = RequestStatusEnum.Cancelled;
-        SetUpdated();
+        SetModificationInfo(requesterId);
     }
 
 

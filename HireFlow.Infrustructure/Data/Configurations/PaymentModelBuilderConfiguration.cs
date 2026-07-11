@@ -34,6 +34,8 @@ public class PaymentModelBuilderConfiguration : BaseModelBuilderConfiguration<Pa
         
         modelBuilder.HasIndex(p => p.CompanyId);
         modelBuilder.HasIndex(p => p.JobAdId);
-        modelBuilder.HasIndex(p => p.Status);                                                                                                                                                                     
+        modelBuilder.HasIndex(p => p.Status);              
+        
+        
     }
 }

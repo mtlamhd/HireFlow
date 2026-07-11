@@ -18,8 +18,6 @@ public class Company : BaseEntity , IValidatableEntity
     public string? PhoneNumber { get; private set; }
 
     public string? Address { get; private set; }
-
-    public string? LogoUrl { get; private set; }
     
     public Guid? LogoId { get; private set; }
     public Attachment? Logo { get; private set; }
@@ -38,8 +36,7 @@ public class Company : BaseEntity , IValidatableEntity
         string? website = null,
         string? email = null,
         string? phoneNumber = null,
-        string? address = null,
-        string? logoUrl = null)
+        string? address = null)
     {
         Name = name;
         OwnerId = ownerId;
@@ -48,7 +45,6 @@ public class Company : BaseEntity , IValidatableEntity
         Email = email;
         PhoneNumber = phoneNumber;
         Address = address;
-        LogoUrl = logoUrl;
 
         Validate();
     }
@@ -83,16 +79,16 @@ public class Company : BaseEntity , IValidatableEntity
                 "Company email format is invalid.",
                 2005);
     }
-    public void SetLogo(Guid attachmentId)
+    public void SetLogo(Guid attachmentId, Guid requesterId)
     {
         LogoId = attachmentId;
-        SetUpdated();
+        SetModificationInfo(requesterId);
     }
 
-    public void RemoveLogo()
+    public void RemoveLogo(Guid requesterId)
     {
         LogoId = null;
-        SetUpdated();
+        SetModificationInfo(requesterId);
     }
 
     public void UpdateInfo(
@@ -101,8 +97,8 @@ public class Company : BaseEntity , IValidatableEntity
         string? website,
         string? email,
         string? phoneNumber,
-        string? address,
-        string? logoUrl)
+        string? address
+        )
     {
         Name = name;
         Description = description;
@@ -110,8 +106,6 @@ public class Company : BaseEntity , IValidatableEntity
         Email = email;
         PhoneNumber = phoneNumber;
         Address = address;
-        LogoUrl = logoUrl;
-
         Validate();
         }
 }

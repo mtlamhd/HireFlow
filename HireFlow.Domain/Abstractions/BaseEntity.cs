@@ -1,24 +1,43 @@
+using HireFlow.Domain.Entities;
+
 namespace HireFlow.Domain.Abstractions;
 
-    public abstract class BaseEntity 
+    public abstract class BaseEntity
     {
-        public Guid Id { get; protected set; } = Guid.NewGuid();
+        public Guid Id { get; private set; } = new SequentialGuid.SequentialGuid();
 
-        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+       
+
+        
+        public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+        public Guid? CreatedById { get; protected set; }
+        public User? Creator { get; protected set; }
+
+        
+        public DateTime? ModifiedAt { get; private set; }
+        public Guid? ModifiedById { get; private set; }
+        public User? Modifier { get; private set; }
+
+        
+        public DateTime? DeletedAt { get; private set; }
+        public Guid? DeletedById { get; private set; }
+        public User? Deleter { get; private set; }
 
         public bool IsDeleted { get; private set; }
 
-        public DateTime? UpdatedAt { get; private set; }
-
-        public void SetUpdated()
+        public void SetModificationInfo(Guid requesterId)
         {
-            UpdatedAt = DateTime.UtcNow;
+            ModifiedAt = DateTime.UtcNow;
+            ModifiedById = requesterId;
         }
 
-        public void Delete()
+        public void SetAsDeleted(Guid requesterId)
         {
             IsDeleted = true;
-            SetUpdated();
+            DeletedAt = DateTime.UtcNow;
+            DeletedById = requesterId;
+            SetModificationInfo(requesterId);
         }
+        
     }
     

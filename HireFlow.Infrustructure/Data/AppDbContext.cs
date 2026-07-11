@@ -12,7 +12,12 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
         
     }
-    
+    public DbSet<Skill> Skills { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Province> Provinces { get; set; }
+    public DbSet<City> Cities { get; set; }
+    public DbSet<Notification>  Notifications { get; set; }
+    public DbSet<JobAdSkill>  JobAdSkills { get; set; }
     public DbSet<Company> Companies { get; set; }
     public DbSet<JobAd> JobAds  { get; set; }
     public DbSet<Request> Requests { get; set; }

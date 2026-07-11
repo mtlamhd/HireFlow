@@ -19,12 +19,7 @@ public class JobAdModelBuilderConfiguration : BaseModelBuilderConfiguration<JobA
         modelBuilder.Property(j => j.Description)
             .IsRequired()
             .HasMaxLength(4000);
-
-       
-        modelBuilder.Property(j => j.Location)
-            .IsRequired()
-            .HasMaxLength(300);
-
+        
         
         modelBuilder.Property(j => j.Salary)
             .HasColumnType("decimal(18,2)")
@@ -48,8 +43,21 @@ public class JobAdModelBuilderConfiguration : BaseModelBuilderConfiguration<JobA
             .HasForeignKey(j => j.CompanyId)
             .OnDelete(DeleteBehavior.Restrict);
         
+        modelBuilder.Property(e => e.EmploymentType)
+            .HasConversion<int>()
+            .IsRequired();
         
         modelBuilder.HasIndex(j => j.Title);
         modelBuilder.HasIndex(j => j.CompanyId);
+        
+        modelBuilder.HasOne(e => e.City)
+            .WithMany(e => e.JobAds)
+            .HasForeignKey(e => e.CityId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        modelBuilder.HasOne(e => e.Category)
+            .WithMany(e => e.JobAds)
+            .HasForeignKey(e => e.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
