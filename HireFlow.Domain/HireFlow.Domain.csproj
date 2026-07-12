@@ -11,4 +11,8 @@
       <PackageReference Include="SequentialGuid" Version="6.1.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Interfaces\Repo\" />
+    </ItemGroup>
+
 </Project>

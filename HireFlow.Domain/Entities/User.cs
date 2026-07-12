@@ -37,7 +37,8 @@ public sealed class User : IdentityUser<Guid>, IValidatableEntity
     public string? NationalId { get; private set; }
 
     public ICollection<Company> Companies { get; private set; } = new List<Company>();
-
+    
+    public bool IsApproved { get; private set; } 
     public ICollection<Request> Requests { get; private set; } = new List<Request>();
 
     public ICollection<Notification> Notifications { get; private set; } = new List<Notification>();
@@ -50,6 +51,7 @@ public sealed class User : IdentityUser<Guid>, IValidatableEntity
 
     public User(
         string phoneNumber,
+        bool isApproved = false,
         Guid? requesterId = null)
     {
         Id = new SequentialGuid.SequentialGuid();
@@ -58,7 +60,7 @@ public sealed class User : IdentityUser<Guid>, IValidatableEntity
         UserName = phoneNumber;
 
         CreatedById = requesterId ?? Id;
-
+        IsApproved = isApproved;
         Validate();
     }
 
@@ -67,6 +69,13 @@ public sealed class User : IdentityUser<Guid>, IValidatableEntity
         string lastName,
         Guid requesterId)
     {
+        
+        if (string.IsNullOrWhiteSpace(firstName))
+            throw new ValidationException("First name is required.", 6004);
+
+        if (string.IsNullOrWhiteSpace(lastName))
+            throw new ValidationException("Last name is required.", 6005);
+        
         FirstName = firstName;
         LastName = lastName;
 
@@ -163,6 +172,20 @@ public sealed class User : IdentityUser<Guid>, IValidatableEntity
 
         SetModificationInfo(requesterId);
     }
+    public void Approve(Guid requesterId)
+    {
+        if (IsApproved) return;
+        IsApproved = true;
+        SetModificationInfo(requesterId);
+    }
+
+
+    public void Disapprove(Guid requesterId)
+    {
+        if (!IsApproved) return;
+        IsApproved = false;
+        SetModificationInfo(requesterId);
+    }
 
     public void Validate()
     {
@@ -184,14 +207,6 @@ public sealed class User : IdentityUser<Guid>, IValidatableEntity
             throw new ValidationException(
                 "Birth date cannot be in the future.",
                 6003);
-        if (string.IsNullOrWhiteSpace(FirstName))
-            throw new ValidationException(
-                "First name is required.",
-                6004);
-
-        if (string.IsNullOrWhiteSpace(LastName))
-            throw new ValidationException(
-                "Last name is required.",
-                6005);
+        
     }
 }

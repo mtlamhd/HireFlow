@@ -20,6 +20,10 @@ public class UserModelBuilderConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(u => u.ResumeId)
             .OnDelete(DeleteBehavior.Restrict);
         
+        builder.Property(u => u.IsApproved)
+            .IsRequired()
+            .HasDefaultValue(false);
+        
        builder.HasOne(x => x.Creator)
             .WithMany()
             .HasForeignKey(x => x.CreatedById)
