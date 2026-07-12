@@ -1,4 +1,6 @@
+using HireFlow.Domain.Interfaces.Repo;
 using HireFlow.Infrustructure.Data;
+using HireFlow.Infrustructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +18,10 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
             
+        services.AddScoped<ICompanyRepository, CompanyRepository>();
+        services.AddScoped<IJobAdRepository, JobAdRepository>();
+        services.AddScoped<IRequestRepository, RequestRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }
 }

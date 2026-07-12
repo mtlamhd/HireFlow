@@ -2,16 +2,17 @@ using System.Linq.Expressions;
 using HireFlow.Domain.Abstractions;
 using HireFlow.Domain.Entities;
 using HireFlow.Domain.Interfaces.Repo;
+using HireFlow.Infrustructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace HireFlow.Infrustructure.Repositories;
 
 public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 {
-    protected readonly DbContext _context;
+    protected readonly  AppDbContext _context;
     protected readonly DbSet<T> _dbSet;
 
-    public GenericRepository(DbContext context)
+    public GenericRepository(AppDbContext context)
     {
         _context = context;
         _dbSet = _context.Set<T>();
