@@ -1,4 +1,5 @@
 using System.Text;
+using HireFlow.Business;
 using HireFlow.Business.Authentications;
 using HireFlow.Domain.Entities;
 using HireFlow.Infrustructure;
@@ -8,36 +9,33 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplicationServices();
 
 builder.Services
-    .AddIdentity<User,Role>(options =>
+    .AddIdentity<User, Role>(options =>
     {
-        
         options.Password.RequireDigit = true;
         options.Password.RequireUppercase = false;
         options.Password.RequireLowercase = true;
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequiredLength = 6;
 
-        
-        options.User.RequireUniqueEmail = true;
-        
+        options.User.RequireUniqueEmail = false;
+
         options.Lockout.MaxFailedAccessAttempts = 5;
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-
 var jwtSettings = builder.Configuration.GetSection("JwtConfigurations").Get<JwtSettings>()!;
 
-
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtConfigurations"));
-
 
 builder.Services.AddAuthentication(options =>
 {
@@ -63,15 +61,38 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo 
+    { 
+        Title = "HireFlow API", 
+        Version = "v1" 
+    });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your valid token in the text input below."
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", document, "apiKey")] = new List<string>()
+    });
+});
+
+
 var app = builder.Build();
+
 await app.SeedDataBaseAsync();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
