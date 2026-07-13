@@ -130,7 +130,7 @@ public class AuthenticationService : IAuthenticationService
 
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
             var credentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-            var expiresIn = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiresInMinutes);
+            var expiresIn = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryInMinutes);
 
             var token = new JwtSecurityToken(
                 _jwtSettings.Issuer,
