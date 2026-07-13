@@ -80,9 +80,13 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Enter 'Bearer' [space] and then your valid token in the text input below."
     });
 
-    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(document =>
     {
-        [new OpenApiSecuritySchemeReference("Bearer", document, "apiKey")] = new List<string>()
+        var securitySchemeRef = new OpenApiSecuritySchemeReference("Bearer", document);
+        return new OpenApiSecurityRequirement
+        {
+            [securitySchemeRef] = new List<string>()
+        };
     });
 });
 

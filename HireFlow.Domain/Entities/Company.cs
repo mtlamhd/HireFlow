@@ -97,8 +97,8 @@ public class Company : BaseEntity , IValidatableEntity
         string? website,
         string? email,
         string? phoneNumber,
-        string? address
-        )
+        string? address,
+        Guid requesterId)
     {
         Name = name;
         Description = description;
@@ -106,6 +106,8 @@ public class Company : BaseEntity , IValidatableEntity
         Email = email;
         PhoneNumber = phoneNumber;
         Address = address;
+    
         Validate();
-        }
+        SetModificationInfo(requesterId);
+    }
 }
