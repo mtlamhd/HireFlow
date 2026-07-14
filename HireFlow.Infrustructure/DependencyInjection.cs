@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IProvinceRepository, ProvinceRepository>();
         services.AddScoped<ICityRepository, CityRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IAttachmentRepository, AttachmentRepository>();
         return services;
     }
 }

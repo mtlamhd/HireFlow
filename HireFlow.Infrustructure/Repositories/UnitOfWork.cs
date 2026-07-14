@@ -13,7 +13,7 @@ public class UnitOfWork : IUnitOfWork
     public IProvinceRepository Provinces { get; }
     public ICityRepository Cities { get; }
     public ICategoryRepository Categories { get; }
-
+    public IAttachmentRepository Attachments { get; }
     public UnitOfWork(
         AppDbContext context,
         ICompanyRepository companies,
@@ -21,7 +21,8 @@ public class UnitOfWork : IUnitOfWork
         IRequestRepository requests,
         IProvinceRepository provinces,
         ICityRepository cities,
-        ICategoryRepository categories)
+        ICategoryRepository categories,
+        IAttachmentRepository attachments)
     {
         _context = context;
         Companies = companies;
@@ -30,6 +31,7 @@ public class UnitOfWork : IUnitOfWork
         Provinces = provinces;
         Cities = cities;
         Categories = categories;
+        Attachments = attachments;
     }
 
     public async Task<int> SaveChangesAsync()

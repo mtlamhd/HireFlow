@@ -8,6 +8,7 @@ public interface IUnitOfWork
     IProvinceRepository Provinces { get; }
     ICityRepository Cities { get; }
     ICategoryRepository Categories { get; }
+    IAttachmentRepository Attachments { get; }
     
     Task<int> SaveChangesAsync();
 }
