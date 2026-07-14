@@ -33,6 +33,11 @@ public class CompanyModelBuilderConfiguration : BaseModelBuilderConfiguration<Co
             .WithMany(u => u.Companies)
             .HasForeignKey(c => c.OwnerId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        modelBuilder.HasOne(c => c.City)
+            .WithMany(cy => cy.Companies)
+            .HasForeignKey(c => c.CityId)
+            .OnDelete(DeleteBehavior.Restrict);
 
        
         modelBuilder.HasOne(c => c.Logo)

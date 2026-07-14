@@ -9,6 +9,7 @@ public class Category : BaseEntity, IValidatableEntity
     public string Name { get; private set; }
 
     public ICollection<JobAd> JobAds { get; private set; } = new List<JobAd>();
+    public ICollection<CompanyCategory> CompanyCategories { get; private set; } = new List<CompanyCategory>();
 
     private Category()
     {

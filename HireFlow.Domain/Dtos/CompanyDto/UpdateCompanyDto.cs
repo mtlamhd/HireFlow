@@ -22,4 +22,8 @@ public class UpdateCompanyDto
 
     [StringLength(500, ErrorMessage = "Company address cannot exceed 500 characters.")]
     public string? Address { get; set; }
+
+    public Guid? CityId { get; set; }
+
+    public List<Guid>? CategoryIds { get; set; } = new();
 }

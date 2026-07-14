@@ -31,7 +31,7 @@ public class CompanyController : ControllerBase
         
         return Ok(company);
     }
-                                    
+                                     
     [HttpPut("my-company")]
     public async Task<IActionResult> UpdateMyCompany([FromBody] UpdateCompanyDto dto)
     {

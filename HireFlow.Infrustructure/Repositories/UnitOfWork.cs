@@ -10,17 +10,26 @@ public class UnitOfWork : IUnitOfWork
     public ICompanyRepository Companies { get; }
     public IJobAdRepository JobAds { get; }
     public IRequestRepository Requests { get; }
+    public IProvinceRepository Provinces { get; }
+    public ICityRepository Cities { get; }
+    public ICategoryRepository Categories { get; }
 
     public UnitOfWork(
         AppDbContext context,
         ICompanyRepository companies,
         IJobAdRepository jobAds,
-        IRequestRepository requests)
+        IRequestRepository requests,
+        IProvinceRepository provinces,
+        ICityRepository cities,
+        ICategoryRepository categories)
     {
         _context = context;
         Companies = companies;
         JobAds = jobAds;
         Requests = requests;
+        Provinces = provinces;
+        Cities = cities;
+        Categories = categories;
     }
 
     public async Task<int> SaveChangesAsync()

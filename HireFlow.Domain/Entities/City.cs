@@ -13,6 +13,7 @@ public class City : BaseEntity, IValidatableEntity
     public Province Province { get; private set; }
 
     public ICollection<JobAd> JobAds { get; private set; } = new List<JobAd>();
+    public ICollection<Company> Companies { get; private set; } = new List<Company>();
 
     private City() { }
 

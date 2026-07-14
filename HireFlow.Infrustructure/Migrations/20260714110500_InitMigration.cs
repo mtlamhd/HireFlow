@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HireFlow.Infrustructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigrationn : Migration
+    public partial class InitMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -112,6 +112,7 @@ namespace HireFlow.Infrustructure.Migrations
                     ResumeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     NationalId = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    IsApproved = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -352,59 +353,6 @@ namespace HireFlow.Infrustructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Companies",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    Website = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    LogoId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ModifiedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Companies", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Companies_AspNetUsers_CreatedById",
-                        column: x => x.CreatedById,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Companies_AspNetUsers_DeletedById",
-                        column: x => x.DeletedById,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Companies_AspNetUsers_ModifiedById",
-                        column: x => x.ModifiedById,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Companies_AspNetUsers_OwnerId",
-                        column: x => x.OwnerId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Companies_Attachments_LogoId",
-                        column: x => x.LogoId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Cities",
                 columns: table => new
                 {
@@ -443,6 +391,160 @@ namespace HireFlow.Infrustructure.Migrations
                         principalTable: "Provinces",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserSkills",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SkillId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSkills", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserSkills_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_UserSkills_AspNetUsers_DeletedById",
+                        column: x => x.DeletedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_UserSkills_AspNetUsers_ModifiedById",
+                        column: x => x.ModifiedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_UserSkills_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserSkills_Skills_SkillId",
+                        column: x => x.SkillId,
+                        principalTable: "Skills",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Companies",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Website = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    LogoId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Companies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Companies_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Companies_AspNetUsers_DeletedById",
+                        column: x => x.DeletedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Companies_AspNetUsers_ModifiedById",
+                        column: x => x.ModifiedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Companies_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Companies_Attachments_LogoId",
+                        column: x => x.LogoId,
+                        principalTable: "Attachments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Companies_Cities_CityId",
+                        column: x => x.CityId,
+                        principalTable: "Cities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CompanyCategories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CompanyCategories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CompanyCategories_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_CompanyCategories_AspNetUsers_DeletedById",
+                        column: x => x.DeletedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_CompanyCategories_AspNetUsers_ModifiedById",
+                        column: x => x.ModifiedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_CompanyCategories_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CompanyCategories_Companies_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Companies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -783,6 +885,11 @@ namespace HireFlow.Infrustructure.Migrations
                 column: "ProvinceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Companies_CityId",
+                table: "Companies",
+                column: "CityId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Companies_CreatedById",
                 table: "Companies",
                 column: "CreatedById");
@@ -818,6 +925,32 @@ namespace HireFlow.Infrustructure.Migrations
                 name: "IX_Companies_OwnerId",
                 table: "Companies",
                 column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CompanyCategories_CategoryId",
+                table: "CompanyCategories",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CompanyCategories_CompanyId_CategoryId",
+                table: "CompanyCategories",
+                columns: new[] { "CompanyId", "CategoryId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CompanyCategories_CreatedById",
+                table: "CompanyCategories",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CompanyCategories_DeletedById",
+                table: "CompanyCategories",
+                column: "DeletedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CompanyCategories_ModifiedById",
+                table: "CompanyCategories",
+                column: "ModifiedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_JobAds_CategoryId",
@@ -986,6 +1119,32 @@ namespace HireFlow.Infrustructure.Migrations
                 table: "Skills",
                 column: "ModifiedById");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSkills_CreatedById",
+                table: "UserSkills",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSkills_DeletedById",
+                table: "UserSkills",
+                column: "DeletedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSkills_ModifiedById",
+                table: "UserSkills",
+                column: "ModifiedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSkills_SkillId",
+                table: "UserSkills",
+                column: "SkillId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSkills_UserId_SkillId",
+                table: "UserSkills",
+                columns: new[] { "UserId", "SkillId" },
+                unique: true);
+
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserClaims_AspNetUsers_UserId",
                 table: "AspNetUserClaims",
@@ -1058,6 +1217,9 @@ namespace HireFlow.Infrustructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "CompanyCategories");
+
+            migrationBuilder.DropTable(
                 name: "JobAdSkills");
 
             migrationBuilder.DropTable(
@@ -1070,22 +1232,25 @@ namespace HireFlow.Infrustructure.Migrations
                 name: "Requests");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "UserSkills");
 
             migrationBuilder.DropTable(
-                name: "Skills");
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "JobAds");
 
             migrationBuilder.DropTable(
+                name: "Skills");
+
+            migrationBuilder.DropTable(
                 name: "Categories");
 
             migrationBuilder.DropTable(
-                name: "Cities");
+                name: "Companies");
 
             migrationBuilder.DropTable(
-                name: "Companies");
+                name: "Cities");
 
             migrationBuilder.DropTable(
                 name: "Provinces");

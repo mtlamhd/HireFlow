@@ -45,7 +45,6 @@ public class JobAd : BaseEntity, IValidatableEntity
         Guid cityId,
         Guid categoryId,
         Guid companyId,
-        DateTime expireAt,
         EmploymentTypeEnum employmentType,
         decimal? salary = null)
     {
@@ -55,9 +54,8 @@ public class JobAd : BaseEntity, IValidatableEntity
         CategoryId = categoryId;
         CompanyId = companyId;
         Salary = salary;
-        ExpireAt = expireAt;
         EmploymentType = employmentType;
-
+        ExpireAt = CreatedAt.AddDays(30); 
         Validate();
     }
 

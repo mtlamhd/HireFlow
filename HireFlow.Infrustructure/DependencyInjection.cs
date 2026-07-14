@@ -22,6 +22,9 @@ public static class DependencyInjection
         services.AddScoped<IJobAdRepository, JobAdRepository>();
         services.AddScoped<IRequestRepository, RequestRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IProvinceRepository, ProvinceRepository>();
+        services.AddScoped<ICityRepository, CityRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
         return services;
     }
 }

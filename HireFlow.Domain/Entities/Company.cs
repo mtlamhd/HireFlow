@@ -26,6 +26,11 @@ public class Company : BaseEntity , IValidatableEntity
     public User Owner { get; private set; }
 
     public ICollection<JobAd> JobAds { get; private set; } = new List<JobAd>();
+    
+    public Guid? CityId { get; private set; }
+    public City? City { get; private set; }
+    public ICollection<CompanyCategory> CompanyCategories { get; private set; } = new List<CompanyCategory>();
+    
 
 
     
@@ -36,7 +41,8 @@ public class Company : BaseEntity , IValidatableEntity
         string? website = null,
         string? email = null,
         string? phoneNumber = null,
-        string? address = null)
+        string? address = null,
+        Guid? cityId = null)
     {
         Name = name;
         OwnerId = ownerId;
@@ -45,8 +51,17 @@ public class Company : BaseEntity , IValidatableEntity
         Email = email;
         PhoneNumber = phoneNumber;
         Address = address;
-
+        CityId = cityId;
         Validate();
+    }
+    
+    public void UpdateCategories(IEnumerable<Guid> categoryIds)
+    {
+        CompanyCategories.Clear();
+        foreach (var categoryId in categoryIds)
+        {
+            CompanyCategories.Add(new CompanyCategory(Id, categoryId));
+        }
     }
     
     private Company() { }
@@ -98,6 +113,7 @@ public class Company : BaseEntity , IValidatableEntity
         string? email,
         string? phoneNumber,
         string? address,
+        Guid? cityId, 
         Guid requesterId)
     {
         Name = name;
@@ -106,6 +122,7 @@ public class Company : BaseEntity , IValidatableEntity
         Email = email;
         PhoneNumber = phoneNumber;
         Address = address;
+        CityId = cityId; 
     
         Validate();
         SetModificationInfo(requesterId);

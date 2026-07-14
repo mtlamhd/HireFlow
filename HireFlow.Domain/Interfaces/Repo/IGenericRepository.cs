@@ -22,4 +22,6 @@ public interface IGenericRepository<T> where T : BaseEntity
     
     void SoftDelete(T entity, Guid requesterId);
     
+    Task<int> CountAsync(Expression<Func<T, bool>> predicate);
+    
 }

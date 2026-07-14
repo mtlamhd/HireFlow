@@ -191,6 +191,9 @@ namespace HireFlow.Infrustructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<Guid?>("CityId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -242,6 +245,8 @@ namespace HireFlow.Infrustructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CityId");
+
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("DeletedById");
@@ -259,6 +264,57 @@ namespace HireFlow.Infrustructure.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Companies", (string)null);
+                });
+
+            modelBuilder.Entity("HireFlow.Domain.Entities.CompanyCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("DeletedById");
+
+                    b.HasIndex("ModifiedById");
+
+                    b.HasIndex("CompanyId", "CategoryId")
+                        .IsUnique();
+
+                    b.ToTable("CompanyCategories", (string)null);
                 });
 
             modelBuilder.Entity("HireFlow.Domain.Entities.JobAd", b =>
@@ -1059,6 +1115,11 @@ namespace HireFlow.Infrustructure.Migrations
 
             modelBuilder.Entity("HireFlow.Domain.Entities.Company", b =>
                 {
+                    b.HasOne("HireFlow.Domain.Entities.City", "City")
+                        .WithMany("Companies")
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("HireFlow.Domain.Entities.User", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatedById")
@@ -1085,6 +1146,8 @@ namespace HireFlow.Infrustructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("City");
+
                     b.Navigation("Creator");
 
                     b.Navigation("Deleter");
@@ -1094,6 +1157,46 @@ namespace HireFlow.Infrustructure.Migrations
                     b.Navigation("Modifier");
 
                     b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("HireFlow.Domain.Entities.CompanyCategory", b =>
+                {
+                    b.HasOne("HireFlow.Domain.Entities.Category", "Category")
+                        .WithMany("CompanyCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HireFlow.Domain.Entities.Company", "Company")
+                        .WithMany("CompanyCategories")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HireFlow.Domain.Entities.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("HireFlow.Domain.Entities.User", "Deleter")
+                        .WithMany()
+                        .HasForeignKey("DeletedById")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("HireFlow.Domain.Entities.User", "Modifier")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("Deleter");
+
+                    b.Navigation("Modifier");
                 });
 
             modelBuilder.Entity("HireFlow.Domain.Entities.JobAd", b =>
@@ -1475,16 +1578,22 @@ namespace HireFlow.Infrustructure.Migrations
 
             modelBuilder.Entity("HireFlow.Domain.Entities.Category", b =>
                 {
+                    b.Navigation("CompanyCategories");
+
                     b.Navigation("JobAds");
                 });
 
             modelBuilder.Entity("HireFlow.Domain.Entities.City", b =>
                 {
+                    b.Navigation("Companies");
+
                     b.Navigation("JobAds");
                 });
 
             modelBuilder.Entity("HireFlow.Domain.Entities.Company", b =>
                 {
+                    b.Navigation("CompanyCategories");
+
                     b.Navigation("JobAds");
                 });
 

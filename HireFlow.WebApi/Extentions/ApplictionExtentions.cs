@@ -1,5 +1,6 @@
 using HireFlow.Business.Authentications.Constants;
 using HireFlow.Domain.Entities;
+using HireFlow.Infrustructure.Data;
 using HireFlow.WebApi.Configurtions;
 using Microsoft.AspNetCore.Identity;
 
@@ -11,11 +12,14 @@ public static class ApplicationExtensions
     public static async Task SeedDataBaseAsync(this IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.CreateScope();
-        
-       
+    
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    
         await SeedRolesAsync(scope.ServiceProvider);
-        
+    
         await SeedAdminsAsync(scope.ServiceProvider);
+
+        await SeedData.SeedAsync(context);
     }
 
     
