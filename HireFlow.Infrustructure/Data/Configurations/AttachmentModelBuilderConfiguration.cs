@@ -17,7 +17,7 @@ public class AttachmentModelBuilderConfiguration : BaseModelBuilderConfiguration
 
         
         modelBuilder.Property(a => a.FilePath)
-            .IsRequired()
+            .IsRequired(false)
             .HasMaxLength(1000);
 
       
