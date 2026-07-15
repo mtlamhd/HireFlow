@@ -1,3 +1,4 @@
+using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.CityDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
 using HireFlow.Domain.Interfaces.Repo;
@@ -17,14 +18,14 @@ public class CityService : ICityService
     {
         if (provinceId == Guid.Empty)
         {
-            throw new Exception("Province ID cannot be empty.");
+            throw new InvalidRequestException("Province ID cannot be empty.");
         }
         
         var provinceExists = await _unitOfWork.Provinces.AnyAsync(p => p.Id == provinceId);
         
         if (!provinceExists)
         {
-            throw new Exception("The specified province does not exist.");
+            throw new ItemNotFoundException("Province", provinceId);
         }
         
         return await _unitOfWork.Cities.GetCitiesDtoByProvinceIdAsync(provinceId);

@@ -1,3 +1,4 @@
+using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Entities;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
 using Microsoft.AspNetCore.Http;
@@ -19,13 +20,16 @@ public class AdminService : IAdminService
         var user = await _userManager.FindByIdAsync(userId.ToString());
         
         if (user == null)
-            throw new Exception("User not found.");
+            throw new ItemNotFoundException("User", userId);
 
         user.Approve(requesterId);
 
         var result = await _userManager.UpdateAsync(user);
         
         if (!result.Succeeded)
-            throw new Exception("Failed to approve employer.");
+        {
+            var errorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
+            throw new IdentityOperationException("Employer Approval", errorMessage);
+        }
     }
 }

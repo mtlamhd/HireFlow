@@ -1,3 +1,4 @@
+using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.CompanyDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
 using HireFlow.Domain.Interfaces.Repo;
@@ -17,14 +18,14 @@ public class CompanyService : ICompanyService
         
         if (userId == Guid.Empty)
         {
-            throw new Exception("User ID cannot be empty.");
+            throw new InvalidRequestException("User ID cannot be empty.");
         }
         
         var companyDto = await _unitOfWork.Companies.GetCompanyDetailsByOwnerIdAsync(userId);
         
         if (companyDto == null)
         {
-            throw new Exception("Company not found for the current user.");
+            throw new ItemNotFoundException($"Company for user with id '{userId}' was not found.");
         }
 
         return companyDto;
@@ -35,7 +36,7 @@ public class CompanyService : ICompanyService
         
         if (userId == Guid.Empty)
         {
-            throw new Exception("User ID cannot be empty.");
+            throw new InvalidRequestException("User ID cannot be empty.");
         }
 
         if (dto.CityId.HasValue && dto.CityId.Value != Guid.Empty)
@@ -43,7 +44,7 @@ public class CompanyService : ICompanyService
             var cityExists = await _unitOfWork.Cities.AnyAsync(c => c.Id == dto.CityId.Value);
             if (!cityExists)
             {
-                throw new Exception("The specified city does not exist.");
+                throw new ItemNotFoundException("City", dto.CityId.Value);
             }
         }
         
@@ -55,7 +56,7 @@ public class CompanyService : ICompanyService
 
             if (validCategoriesCount != uniqueCategoryIds.Count)
             {
-                throw new Exception("One or more category IDs are invalid.");
+                throw new ItemNotFoundException("One or more specified categories were not found.");
             }
         }
         
@@ -63,7 +64,7 @@ public class CompanyService : ICompanyService
         
         if (!isUpdated)
         {
-            throw new Exception("Company not found for the current user.");
+            throw new ItemNotFoundException($"Company for user with id '{userId}' was not found.");
         }
 
         
@@ -75,14 +76,14 @@ public class CompanyService : ICompanyService
     {
         if (userId == Guid.Empty || attachmentId == Guid.Empty)
         {
-            throw new Exception("Invalid parameters.");
+            throw new InvalidRequestException("User ID and Attachment ID cannot be empty.");
         }
 
         var company = await _unitOfWork.Companies.GetFirstOrDefaultAsync(c => c.OwnerId == userId, tracking: true);
 
         if (company == null)
         {
-            throw new Exception("Company not found for the current user.");
+            throw new ItemNotFoundException($"Company for user with id '{userId}' was not found.");
         }
 
         company.SetLogo(attachmentId, userId);
@@ -94,14 +95,14 @@ public class CompanyService : ICompanyService
     {
         if (userId == Guid.Empty)
         {
-            throw new Exception("User ID cannot be empty.");
+            throw new InvalidRequestException("User ID cannot be empty.");
         }
 
         var company = await _unitOfWork.Companies.GetFirstOrDefaultAsync(c => c.OwnerId == userId, tracking: true);
 
         if (company == null)
         {
-            throw new Exception("Company not found for the current user.");
+            throw new ItemNotFoundException($"Company for user with id '{userId}' was not found.");
         }
 
         company.RemoveLogo(userId);
