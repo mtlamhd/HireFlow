@@ -41,6 +41,23 @@ public class SeedData
                 };
                 await context.Cities.AddRangeAsync(cities);
             }
+            if (!await context.Skills.AnyAsync())
+            {
+                var skills = new List<Skill>
+                {
+                    new Skill("C# and .NET"),
+                    new Skill("ASP.NET Core Web API"),
+                    new Skill("SQL Server / Entity Framework"),
+                    new Skill("JavaScript / TypeScript"),
+                    new Skill("React.js"),
+                    new Skill("Python"),
+                    new Skill("Docker and DevOps"),
+                    new Skill("Git and GitHub"),
+                    new Skill("Project Management"),
+                    new Skill("UI/UX Design")
+                };
+                await context.Skills.AddRangeAsync(skills);
+            }
 
             await context.SaveChangesAsync();
         }
