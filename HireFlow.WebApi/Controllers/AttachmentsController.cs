@@ -15,22 +15,12 @@ public class AttachmentsController : ControllerBase
     {
         _attachmentService = attachmentService;
     }
-
     [HttpGet("{id}")]
     public async Task<IActionResult> Download(Guid id)
     {
-        try
-        {
-            
-            var fileDto = await _attachmentService.DownloadAsync(id);
-
-          
-            return File(fileDto.Data, fileDto.ContentType, fileDto.FileName);
-        }
-        catch (Exception ex)
-        {
-           
-            return NotFound(new { message = ex.Message });
-        }
+       
+        var fileDto = await _attachmentService.DownloadAsync(id);
+        
+        return File(fileDto.Data, fileDto.ContentType, fileDto.FileName);
     }
 }

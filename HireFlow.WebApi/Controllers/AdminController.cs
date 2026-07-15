@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using HireFlow.Business.Authentications.Constants;
+using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
+using HireFlow.WebApi.ResultPaterns;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,12 +25,16 @@ public class AdminController : ControllerBase
     {
         var adminIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (adminIdClaim == null)
-            return Unauthorized();
+        {
+           
+            throw new ResourceAccessDeniedException("Admin identity claim was not found.");
+        }
 
         var adminId = Guid.Parse(adminIdClaim);
 
         await _adminService.ApproveEmployerAsync(userId, adminId);
         
-        return Ok(new { message = "Employer approved successfully." });
+       
+        return Ok(Result.Success("Employer approved successfully."));
     }
 }

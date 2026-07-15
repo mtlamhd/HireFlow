@@ -4,7 +4,6 @@ namespace HireFlow.Domain.Interfaces.InterfaceOfService;
 
 public interface IAttachmentService
 {
-    
     Task<AttachmentResultDto> UploadAsync(UploadAttachmentDto dto);
 
    

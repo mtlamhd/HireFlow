@@ -1,4 +1,6 @@
+using HireFlow.Domain.Dtos.SkillDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
+using HireFlow.WebApi.ResultPaterns;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ public class SkillsController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var skills = await _skillService.GetAllSkillsAsync();
-        return Ok(skills);
+        
+        return Ok(GenericResult<List<SkillViewDto>>.Success(skills));
     }
 }

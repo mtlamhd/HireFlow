@@ -2,6 +2,7 @@ using System.Security.Claims;
 using HireFlow.Business.Authentications.Constants;
 using HireFlow.Domain.Dtos.RequestDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
+using HireFlow.WebApi.ResultPaterns;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,59 +20,33 @@ public class RequestsController : ControllerBase
         _requestService = requestService;
     }
 
-   
     [HttpGet("by-job-ad/{jobAdId}")]
     public async Task<IActionResult> GetRequestsByJobAd(Guid jobAdId)
     {
-        try
-        {
-            var userId = GetCurrentUserId();
-            var requests = await _requestService.GetJobAdRequestsAsync(userId, jobAdId);
-            
-            return Ok(requests);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var userId = GetCurrentUserId();
+        var requests = await _requestService.GetJobAdRequestsAsync(userId, jobAdId);
+        
+        return Ok(GenericResult<List<RequestSummaryDto>>.Success(requests));
     }
 
-    
     [HttpGet("{id}")]
     public async Task<IActionResult> GetRequestDetails(Guid id)
     {
-        try
-        {
-            var userId = GetCurrentUserId();
-            var requestDetails = await _requestService.GetRequestDetailsAsync(userId, id);
-            
-            return Ok(requestDetails);
-        }
-        catch (Exception ex)
-        {
-           
-            return NotFound(new { message = ex.Message });
-        }
+        var userId = GetCurrentUserId();
+        var requestDetails = await _requestService.GetRequestDetailsAsync(userId, id);
+        
+        return Ok(GenericResult<RequestViewDto>.Success(requestDetails));
     }
 
-    
     [HttpPut("{id}/status")]
     public async Task<IActionResult> ChangeStatus(Guid id, [FromBody] ChangeRequestStatusDto dto)
     {
-        try
-        {
-            var userId = GetCurrentUserId();
-            await _requestService.ChangeRequestStatusAsync(userId, id, dto);
-            
-            return Ok(new { message = "Request status updated successfully." });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var userId = GetCurrentUserId();
+        await _requestService.ChangeRequestStatusAsync(userId, id, dto);
+        
+        return Ok(GenericResult<Guid>.Success(id, "Request status updated successfully."));
     }
 
-   
     private Guid GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -80,5 +55,4 @@ public class RequestsController : ControllerBase
 
         return Guid.Parse(userIdClaim);
     }
-   
 }

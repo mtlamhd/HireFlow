@@ -1,5 +1,6 @@
 using HireFlow.Domain.Dtos.AuthenticationDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
+using HireFlow.WebApi.ResultPaterns;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HireFlow.WebApi.Controllers;
@@ -18,19 +19,33 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> RegisterJobSeeker([FromBody] RegisterJobSeekerDto dto)
     {
         var result = await _authService.RegisterJobSeekerAsync(dto);
-        return Ok(result);
+        
+        return Ok(GenericResult<RegisterResultDto>.Success(
+            result, 
+            "Job seeker registered successfully.", 
+            201)); 
     }
+    
     [HttpPost("register-employer")]
     public async Task<IActionResult> RegisterEmployer([FromBody] RegisterEmployerDto dto)
     {
         var result = await _authService.RegisterEmployerAsync(dto);
-        return Ok(result);
+        
+        return Ok(GenericResult<RegisterResultDto>.Success(
+            result, 
+            "Employer registered successfully. Your company has been created and is pending admin approval.", 
+            201));
     }
+
     
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
         var result = await _authService.TokenLoginAsync(dto);
-        return Ok(result);
+        
+        return Ok(GenericResult<LoginResultDto>.Success(
+            result, 
+            "Login successful. Welcome to HireFlow.", 
+            200));
     }
 }

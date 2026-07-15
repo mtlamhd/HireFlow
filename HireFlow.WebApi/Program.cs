@@ -5,6 +5,7 @@ using HireFlow.Domain.Entities;
 using HireFlow.Infrustructure;
 using HireFlow.Infrustructure.Data;
 using HireFlow.WebApi.Extentions;
+using HireFlow.WebApi.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -100,7 +101,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-//hello every body 
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

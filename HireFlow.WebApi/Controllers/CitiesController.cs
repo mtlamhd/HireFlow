@@ -1,4 +1,6 @@
+using HireFlow.Domain.Dtos.CityDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
+using HireFlow.WebApi.ResultPaterns;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HireFlow.WebApi.Controllers;
@@ -18,6 +20,9 @@ public class CitiesController : ControllerBase
     public async Task<IActionResult> GetByProvince(Guid provinceId)
     {
         var cities = await _cityService.GetCitiesByProvinceIdAsync(provinceId);
-        return Ok(cities);
+    
+        return Ok(GenericResult<List<CityViewDto>>.Success(
+            cities, 
+            "Cities retrieved successfully."));
     }
 }

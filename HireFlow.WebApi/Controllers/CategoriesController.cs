@@ -1,4 +1,6 @@
+using HireFlow.Domain.Dtos.CategoryDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
+using HireFlow.WebApi.ResultPaterns;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HireFlow.WebApi.Controllers;
@@ -18,6 +20,11 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var categories = await _categoryService.GetAllCategoriesAsync();
-        return Ok(categories);
+        
+        return Ok(GenericResult<List<CategoryViewDto>>.Success(
+            categories, 
+            "Categories retrieved successfully."));
     }
+    
+    
 }

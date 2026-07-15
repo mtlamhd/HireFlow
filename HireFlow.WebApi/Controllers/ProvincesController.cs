@@ -1,4 +1,6 @@
+using HireFlow.Domain.Dtos.ProvinceDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
+using HireFlow.WebApi.ResultPaterns;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HireFlow.WebApi.Controllers;
@@ -18,6 +20,7 @@ public class ProvincesController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var provinces = await _provinceService.GetAllProvincesAsync();
-        return Ok(provinces);
+        
+        return Ok(GenericResult<List<ProvinceViewDto>>.Success(provinces));
     }
 }
