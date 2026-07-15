@@ -1,3 +1,4 @@
+using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.JobAdDto;
 using HireFlow.Domain.Entities;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
@@ -22,12 +23,12 @@ public class JobAdService : IJobAdService
         
         var cityExists = await _unitOfWork.Cities.AnyAsync(c => c.Id == dto.CityId);
         if (!cityExists)
-            throw new Exception("The specified city does not exist.");
+            throw new ItemNotFoundException("City", dto.CityId);
 
    
         var categoryExists = await _unitOfWork.Categories.AnyAsync(c => c.Id == dto.CategoryId);
         if (!categoryExists)
-            throw new Exception("The specified category does not exist.");
+            throw new ItemNotFoundException("Category", dto.CategoryId);
         
         
         var uniqueSkillIds = new List<Guid>();
@@ -36,7 +37,7 @@ public class JobAdService : IJobAdService
             uniqueSkillIds = dto.SkillIds.Distinct().ToList();
             var validSkillsCount = await _unitOfWork.Skills.CountAsync(s => uniqueSkillIds.Contains(s.Id));
             if (validSkillsCount != uniqueSkillIds.Count)
-                throw new Exception("One or more skill IDs are invalid.");
+                throw new ItemNotFoundException("One or more specified skills were not found.");
         }
 
      
@@ -46,7 +47,7 @@ public class JobAdService : IJobAdService
 
         
         var detailsDto = await _unitOfWork.JobAds.GetJobAdDetailsAsync(jobAd.Id);
-        return detailsDto ?? throw new Exception("Error retrieving created job ad details.");
+        return detailsDto ?? throw new ItemNotFoundException("JobAd", jobAd.Id);
     }
     
     public async Task UpdateJobAdAsync(Guid userId, Guid jobAdId, UpdateJobAdDto dto)
@@ -57,11 +58,11 @@ public class JobAdService : IJobAdService
        
         var cityExists = await _unitOfWork.Cities.AnyAsync(c => c.Id == dto.CityId);
         if (!cityExists)
-            throw new Exception("The specified city does not exist.");
+            throw new ItemNotFoundException("City", dto.CityId);
 
         var categoryExists = await _unitOfWork.Categories.AnyAsync(c => c.Id == dto.CategoryId);
         if (!categoryExists)
-            throw new Exception("The specified category does not exist.");
+            throw new ItemNotFoundException("Category", dto.CategoryId);
 
         
         var uniqueSkillIds = new List<Guid>();
@@ -70,13 +71,13 @@ public class JobAdService : IJobAdService
             uniqueSkillIds = dto.SkillIds.Distinct().ToList();
             var validSkillsCount = await _unitOfWork.Skills.CountAsync(s => uniqueSkillIds.Contains(s.Id));
             if (validSkillsCount != uniqueSkillIds.Count)
-                throw new Exception("One or more skill IDs are invalid.");
+                throw new ItemNotFoundException("One or more specified skills were not found.");
         }
 
       
         var isUpdated = await _unitOfWork.JobAds.UpdateJobAdAsync(jobAdId, dto, uniqueSkillIds, userId);
         if (!isUpdated)
-            throw new Exception("Job ad not found.");
+            throw new ItemNotFoundException("JobAd", jobAdId);
 
         
         await _unitOfWork.SaveChangesAsync();
@@ -90,7 +91,7 @@ public class JobAdService : IJobAdService
         var jobAd = await _unitOfWork.JobAds.GetByIdAsync(jobAdId, tracking: true);
         
         if (jobAd == null)
-            throw new Exception("Job ad not found.");
+            throw new ItemNotFoundException("JobAd", jobAdId);
 
         
         _unitOfWork.JobAds.SoftDelete(jobAd, userId);
@@ -113,7 +114,7 @@ public class JobAdService : IJobAdService
         
         var detailsDto = await _unitOfWork.JobAds.GetJobAdDetailsAsync(jobAdId);
         if (detailsDto == null)
-            throw new Exception("Job ad not found.");
+            throw new ItemNotFoundException("JobAd", jobAdId);
 
         return detailsDto;
     }
@@ -125,7 +126,7 @@ public class JobAdService : IJobAdService
         
         var jobAd = await _unitOfWork.JobAds.GetByIdAsync(jobAdId, tracking: true);
         if (jobAd == null)
-            throw new Exception("Job ad not found.");
+            throw new ItemNotFoundException("JobAd", jobAdId);
 
         jobAd.Deactivate(userId);
         
@@ -135,32 +136,32 @@ public class JobAdService : IJobAdService
     private async Task<Company> GetApprovedCompanyAndVerifyOwnershipAsync(Guid userId, Guid? jobAdId = null)
     {
         if (userId == Guid.Empty)
-            throw new Exception("User ID cannot be empty.");
+            throw new InvalidRequestException("User ID cannot be empty.");
 
         
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null)
-            throw new Exception("User not found.");
+            throw new ItemNotFoundException("User", userId);
 
      
         if (!user.IsApproved)
-            throw new Exception("Your employer account is not approved by system admin yet.");
+            throw new EmployerAccountNotApprovedException(userId);
 
        
         var company = await _unitOfWork.Companies.GetFirstOrDefaultAsync(c => c.OwnerId == userId);
         if (company == null)
-            throw new Exception("No registered company found for this employer.");
+            throw new ItemNotFoundException($"No registered company found for employer with id '{userId}'.");
 
       
         if (jobAdId.HasValue)
         {
             var jobAd = await _unitOfWork.JobAds.GetByIdAsync(jobAdId.Value);
             if (jobAd == null)
-                throw new Exception("The requested job ad does not exist.");
+                throw new ItemNotFoundException("JobAd", jobAdId.Value);
 
            
             if (jobAd.CompanyId != company.Id)
-                throw new Exception("Access Denied. You do not own this job ad.");
+                throw new ResourceAccessDeniedException("JobAd", jobAdId.Value);
         }
 
         return company;
