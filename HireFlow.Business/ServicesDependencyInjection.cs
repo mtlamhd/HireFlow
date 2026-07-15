@@ -18,7 +18,7 @@ public static class ServicesDependencyInjection
         services.AddScoped<IAttachmentService, AttachmentService>();
         services.AddScoped<IJobAdService, JobAdService>();
         services.AddScoped<ISkillService, SkillService>();
-        
+        services.AddScoped<IRequestService, RequestService>();
         return services;
     }
 }
