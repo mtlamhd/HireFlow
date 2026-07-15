@@ -9,6 +9,6 @@ public interface IUnitOfWork
     ICityRepository Cities { get; }
     ICategoryRepository Categories { get; }
     IAttachmentRepository Attachments { get; }
-    
+    ISkillRepository Skills { get; }
     Task<int> SaveChangesAsync();
 }

@@ -14,6 +14,7 @@ public class UnitOfWork : IUnitOfWork
     public ICityRepository Cities { get; }
     public ICategoryRepository Categories { get; }
     public IAttachmentRepository Attachments { get; }
+    public ISkillRepository Skills { get; }
     public UnitOfWork(
         AppDbContext context,
         ICompanyRepository companies,
@@ -22,7 +23,7 @@ public class UnitOfWork : IUnitOfWork
         IProvinceRepository provinces,
         ICityRepository cities,
         ICategoryRepository categories,
-        IAttachmentRepository attachments)
+        IAttachmentRepository attachments, ISkillRepository skills)
     {
         _context = context;
         Companies = companies;
@@ -32,6 +33,7 @@ public class UnitOfWork : IUnitOfWork
         Cities = cities;
         Categories = categories;
         Attachments = attachments;
+        Skills = skills;
     }
 
     public async Task<int> SaveChangesAsync()
