@@ -28,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<IAttachmentRepository, AttachmentRepository>();
         services.AddScoped<IJobAdRepository, JobAdRepository>();
         services.AddScoped<ISkillRepository, SkillRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
         return services;
     }
 }

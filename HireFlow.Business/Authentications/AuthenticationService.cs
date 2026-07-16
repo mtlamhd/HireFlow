@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using HireFlow.Business.Authentications.Constants;
+using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.AuthenticationDto;
 using HireFlow.Domain.Entities;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
@@ -38,13 +39,17 @@ public class AuthenticationService : IAuthenticationService
     {
         var duplicateUser = await _userManager.FindByNameAsync(dto.Username);
         if (duplicateUser != null)
-            throw new Exception("User already exists.");
+            throw new ConflictException("User", "Username", dto.Username);
 
         var user = new User(dto.Username, isApproved: true);
         var result = await _userManager.CreateAsync(user, dto.Password);
 
         if (!result.Succeeded)
-            throw new Exception("user creation failed.");
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new UserRegistrationException(errors);
+
+        }
 
         await _userManager.AddToRoleAsync(user, RoleConstants.JobSeekerRoleName);
 
@@ -55,13 +60,16 @@ public class AuthenticationService : IAuthenticationService
     {
         var duplicateUser = await _userManager.FindByNameAsync(dto.Username);
         if (duplicateUser != null)
-            throw new Exception("User already exists.");
+            throw new ConflictException("User", "Username", dto.Username);
 
         var user = new User(dto.Username, isApproved: false);
         var result = await _userManager.CreateAsync(user, dto.Password);
 
         if (!result.Succeeded)
-            throw new Exception(result.Errors.First().Description);
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new UserRegistrationException(errors);
+        }
 
         await _userManager.AddToRoleAsync(user, RoleConstants.EmployerRoleName);
 
@@ -78,19 +86,21 @@ public class AuthenticationService : IAuthenticationService
         var result = await _signInManager.PasswordSignInAsync(
             dto.Username, dto.Password, false, true);
 
-        if (result.IsLockedOut)
-            throw new Exception("User is locked out. Please try again later.");
+       
 
+        if (result.IsLockedOut)
+            throw new AccountLockedException();
+        
         if (!result.Succeeded)
-            throw new Exception("Invalid username or password.");
+            throw new InvalidCredentialsException();
 
         var user = await _userManager.FindByNameAsync(dto.Username);
         if (user == null)
-            throw new Exception("User not found.");
+            throw new ItemNotFoundException("User", dto.Username);
 
         var roles = await _userManager.GetRolesAsync(user);
         if (roles.Contains(RoleConstants.EmployerRoleName) && !user.IsApproved)
-            throw new Exception("Employer account is not approved yet.");
+            throw new EmployerAccountNotApprovedException(user.Id);
 
         return await GenerateTokenAsync(user);
     }
