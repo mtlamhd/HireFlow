@@ -25,12 +25,9 @@ public class JobAdsController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var result = await _jobAdService.CreateJobAdAsync(userId, dto);
-        
-        return CreatedAtAction(
-            nameof(GetById), 
-            new { id = result.Id }, 
-            GenericResult<JobAdDetailsDto>.Success(result, "Job ad created successfully.", 201)
-        );
+    
+       
+        return StatusCode(201, GenericResult<JobAdDetailsDto>.Success(result, "Job ad created successfully.", 201));
     }
 
     [HttpPut("{id}")]
