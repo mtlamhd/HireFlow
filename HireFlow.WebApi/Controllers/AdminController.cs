@@ -37,4 +37,5 @@ public class AdminController : ControllerBase
        
         return Ok(Result.Success("Employer approved successfully."));
     }
+   
 }
