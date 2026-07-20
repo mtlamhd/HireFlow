@@ -1,4 +1,5 @@
 using HireFlow.Domain.Dtos.JobAdDto;
+using HireFlow.Domain.Entities;
 
 namespace HireFlow.Domain.Interfaces.InterfaceOfService;
 
@@ -23,4 +24,9 @@ public interface IJobAdService
     
     
     Task ActivateJobAdAsync(Guid userId, Guid jobAdId);
+    
+    Task<List<PublicJobAdSummaryDto>> GetActiveJobAdsAsync(Paging paging);
+    Task<PublicJobAdDetailsDto> GetPublicJobAdDetailsAsync(Guid id);
+    
+    Task<List<PublicJobAdSummaryDto>> SearchActiveJobAdsAsync(JobAdSearchDto dto);
 }

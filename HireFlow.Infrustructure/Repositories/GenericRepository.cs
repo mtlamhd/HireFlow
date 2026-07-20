@@ -53,7 +53,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         return await query
             .Where(predicate)
             .OrderByDescending(x => x.CreatedAt)
-            .Skip(paging.Skip)
+            .Skip(paging.GetSkip())
             .Take(paging.PageSize)
             .ToListAsync();
     }

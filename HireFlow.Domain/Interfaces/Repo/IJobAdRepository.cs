@@ -9,4 +9,7 @@ public interface IJobAdRepository : IGenericRepository<JobAd>
     Task<JobAdDetailsDto?> GetJobAdDetailsAsync(Guid id);
     Task<JobAd> CreateJobAdAsync(Guid companyId, CreateJobAdDto dto, List<Guid> validSkillIds);
     Task<bool> UpdateJobAdAsync(Guid jobAdId, UpdateJobAdDto dto, List<Guid> validSkillIds, Guid requesterId);
+    Task<List<PublicJobAdSummaryDto>> GetActiveJobAdsAsync(Paging paging);
+    Task<PublicJobAdDetailsDto?> GetPublicJobAdDetailsAsync(Guid id);
+    Task<List<PublicJobAdSummaryDto>> SearchActiveJobAdsAsync(JobAdSearchDto dto);
 }
