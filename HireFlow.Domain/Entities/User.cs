@@ -186,6 +186,17 @@ public sealed class User : IdentityUser<Guid>, IValidatableEntity
         IsApproved = false;
         SetModificationInfo(requesterId);
     }
+    public bool IsProfileComplete()
+    {
+        return !string.IsNullOrWhiteSpace(FirstName)
+               && !string.IsNullOrWhiteSpace(LastName)
+               && !string.IsNullOrWhiteSpace(NationalId)
+               && BirthDate.HasValue;
+    }
+    public bool HasResume()
+    {
+        return ResumeId.HasValue;
+    }
 
     public void Validate()
     {

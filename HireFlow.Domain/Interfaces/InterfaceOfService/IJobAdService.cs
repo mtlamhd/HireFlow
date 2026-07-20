@@ -20,4 +20,7 @@ public interface IJobAdService
     Task<JobAdDetailsDto> GetMyJobAdDetailsAsync(Guid userId, Guid jobAdId);
 
     Task DeactivateJobAdAsync(Guid userId, Guid jobAdId);
+    
+    
+    Task ActivateJobAdAsync(Guid userId, Guid jobAdId);
 }

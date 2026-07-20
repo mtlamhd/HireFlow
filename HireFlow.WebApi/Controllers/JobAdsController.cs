@@ -74,6 +74,16 @@ public class JobAdsController : ControllerBase
         
         return Ok(GenericResult<Guid>.Success(id, "Job ad has been deactivated successfully."));
     }
+    
+    [HttpPut("{id}/activate")]
+    public async Task<IActionResult> Activate(Guid id)
+    {
+        var userId = GetCurrentUserId();
+
+        await _jobAdService.ActivateJobAdAsync(userId, id);
+
+        return Ok(GenericResult<Guid>.Success(id,"Job ad has been activated successfully."));
+    }
 
     private Guid GetCurrentUserId()
     {

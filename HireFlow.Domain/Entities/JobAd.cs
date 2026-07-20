@@ -81,7 +81,19 @@ public class JobAd : BaseEntity, IValidatableEntity
         SetModificationInfo(requesterId);
     }
 
+    public void Activate(Guid requesterId)
+    {
+        if (IsActive)
+            return;
 
+        if (IsExpired())
+            throw new ValidationException(
+                "Expired job ads cannot be activated.",
+                3009);
+
+        IsActive = true;
+        SetModificationInfo(requesterId);
+    }
     public void Deactivate(Guid requesterId)
     {
         if (!IsActive)

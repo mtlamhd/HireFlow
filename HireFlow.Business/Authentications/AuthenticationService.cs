@@ -119,7 +119,6 @@ public class AuthenticationService : IAuthenticationService
                 new(ClaimTypes.Name, displayName),
                 new("IsApproved", user.IsApproved.ToString().ToLower())
             };
-
             var userRoles = (await _userManager.GetRolesAsync(user))
                 .Select(r => new Claim(ClaimTypes.Role, r)).ToList();
 

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using HireFlow.Business.Authentications.Constants;
 using HireFlow.Business.Exceptionss;
+using HireFlow.Domain.Dtos.UserDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
 using HireFlow.WebApi.ResultPaterns;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,17 @@ public class AdminController : ControllerBase
     public AdminController(IAdminService adminService)
     {
         _adminService = adminService;
+    }
+    [HttpGet("pending-employers")]
+    public async Task<IActionResult> GetPendingEmployers()
+    {
+        var employers = await _adminService.GetUnapprovedEmployersAsync();
+
+        return Ok(
+            GenericResult<List<PendingEmployerDto>>.Success(
+                employers,
+                "Pending employers retrieved successfully."
+            ));
     }
 
     [HttpPost("approve-employer/{userId}")]

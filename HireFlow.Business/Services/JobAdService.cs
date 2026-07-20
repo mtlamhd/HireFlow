@@ -132,6 +132,19 @@ public class JobAdService : IJobAdService
         
         await _unitOfWork.SaveChangesAsync();
     }
+    public async Task ActivateJobAdAsync(Guid userId, Guid jobAdId)
+    {
+        await GetApprovedCompanyAndVerifyOwnershipAsync(userId, jobAdId);
+
+        var jobAd = await _unitOfWork.JobAds.GetByIdAsync(jobAdId,tracking: true);
+
+        if (jobAd == null)
+            throw new ItemNotFoundException("JobAd", jobAdId);
+
+        jobAd.Activate(userId);
+
+        await _unitOfWork.SaveChangesAsync();
+    }
     
     private async Task<Company> GetApprovedCompanyAndVerifyOwnershipAsync(Guid userId, Guid? jobAdId = null)
     {
