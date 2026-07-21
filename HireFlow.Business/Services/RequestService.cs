@@ -123,4 +123,109 @@ public class RequestService : IRequestService
             return request;
         }
         
+        public async Task ApplyForJobAdAsync(Guid userId, ApplyJobAdDto dto)
+        {
+          
+            if (userId == Guid.Empty)
+                throw new InvalidRequestException("User ID cannot be empty.");
+
+            if (dto == null || dto.JobAdId == Guid.Empty)
+                throw new InvalidRequestException("Invalid Job Ad ID.");
+
+          
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                throw new ItemNotFoundException("User", userId);
+
+           
+            if (!user.ResumeId.HasValue || user.ResumeId.Value == Guid.Empty)
+            {
+                throw new InvalidRequestException("You must upload your resume before applying to any job.");
+            }
+
+           
+            var jobAd = await _unitOfWork.JobAds.GetByIdAsync(dto.JobAdId);
+            if (jobAd == null)
+                throw new ItemNotFoundException("JobAd", dto.JobAdId);
+
+            
+            if (!jobAd.IsActive || jobAd.IsExpired())
+            {
+                throw new InvalidRequestException("This job advertisement is either inactive or has expired.");
+            }
+
+           
+            var alreadyApplied = await _unitOfWork.Requests.HasAlreadyAppliedAsync(userId, dto.JobAdId);
+            if (alreadyApplied)
+            {
+                throw new ConflictException("You have already submitted an application for this job.");
+            }
+            
+            var request = new Request(dto.JobAdId, userId);
+            
+            await _unitOfWork.Requests.AddAsync(request);
+            await _unitOfWork.SaveChangesAsync();
+        }
+        
+        public async Task<List<JobSeekerRequestSummaryDto>> GetJobSeekerRequestsAsync(Guid userId)
+        {
+            if (userId == Guid.Empty)
+                throw new InvalidRequestException("User ID cannot be empty.");
+
+           
+            var userExists = await _userManager.FindByIdAsync(userId.ToString());
+            if (userExists == null)
+                throw new ItemNotFoundException("User", userId);
+
+            return await _unitOfWork.Requests.GetJobSeekerRequestsAsync(userId);
+        }
+        
+        public async Task<JobSeekerRequestDetailsDto> GetJobSeekerRequestDetailsAsync(Guid userId, Guid requestId)
+        {
+            if (userId == Guid.Empty)
+                throw new InvalidRequestException("User ID cannot be empty.");
+
+            if (requestId == Guid.Empty)
+                throw new InvalidRequestException("Request ID cannot be empty.");
+
+           
+            var request = await _unitOfWork.Requests.GetByIdAsync(requestId);
+            if (request == null)
+                throw new ItemNotFoundException("Request", requestId);
+            
+            if (request.UserId != userId)
+            {
+                throw new ResourceAccessDeniedException("Request", requestId);
+            }
+            
+            var detailsDto = await _unitOfWork.Requests.GetJobSeekerRequestDetailsAsync(requestId);
+            if (detailsDto == null)
+                throw new ItemNotFoundException("Request", requestId);
+
+            return detailsDto;
+        }
+        public async Task CancelRequestAsync(Guid userId, Guid requestId)
+        {
+            if (userId == Guid.Empty)
+                throw new InvalidRequestException("User ID cannot be empty.");
+
+            if (requestId == Guid.Empty)
+                throw new InvalidRequestException("Request ID cannot be empty.");
+
+            
+            var request = await _unitOfWork.Requests.GetByIdAsync(requestId, tracking: true);
+            if (request == null)
+                throw new ItemNotFoundException("Request", requestId);
+
+    
+            if (request.UserId != userId)
+            {
+                throw new ResourceAccessDeniedException("Request", requestId);
+            }
+
+            request.Cancel(userId);
+
+           
+            await _unitOfWork.SaveChangesAsync();
+        }
 }

@@ -61,4 +61,44 @@ public class RequestRepository : GenericRepository<Request>, IRequestRepository
             .FirstOrDefaultAsync();
     }
     
+    public async Task<List<JobSeekerRequestSummaryDto>> GetJobSeekerRequestsAsync(Guid userId)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(r => r.UserId == userId)
+            .OrderByDescending(r => r.CreatedAt) 
+            .Select(r => new JobSeekerRequestSummaryDto
+            {
+                Id = r.Id,
+                JobAdId = r.JobAdId,
+                JobAdTitle = r.JobAd.Title,
+                CompanyName = r.JobAd.Company.Name,
+                Status = r.Status,
+                CreatedAt = r.CreatedAt
+            })
+            .ToListAsync();
+    }
+    
+    public async Task<JobSeekerRequestDetailsDto?> GetJobSeekerRequestDetailsAsync(Guid requestId)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(r => r.Id == requestId)
+            .Select(r => new JobSeekerRequestDetailsDto
+            {
+                Id = r.Id,
+                JobAdId = r.JobAdId,
+                JobAdTitle = r.JobAd.Title,
+                CompanyName = r.JobAd.Company.Name,
+                JobAdDescription = r.JobAd.Description,
+                Status = r.Status,
+                CreatedAt = r.CreatedAt
+            })
+            .FirstOrDefaultAsync();
+    }
+    public async Task<bool> HasAlreadyAppliedAsync(Guid userId, Guid jobAdId)
+    {
+        return await _dbSet.AnyAsync(r => r.UserId == userId && r.JobAdId == jobAdId);
+    }
+    
 }
