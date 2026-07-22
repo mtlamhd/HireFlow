@@ -48,4 +48,27 @@ public class AuthController : ControllerBase
             "Login successful. Welcome to HireFlow.", 
             200));
     }
+    
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto dto)
+    {
+        var result = await _authService.RefreshTokenAsync(dto);
+
+        return Ok(GenericResult<LoginResultDto>.Success(
+            result,
+            "Token refreshed successfully.",
+            200));
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout([FromBody] RefreshTokenDto dto)
+    {
+        await _authService.LogoutAsync(dto);
+
+        return Ok(
+            GenericResult<bool>.Success(
+                true,
+                "Logged out successfully."));
+    }
+    
 }

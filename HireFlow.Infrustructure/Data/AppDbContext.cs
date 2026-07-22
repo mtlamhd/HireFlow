@@ -25,6 +25,7 @@ public class AppDbContext : IdentityDbContext<User, Role , Guid>
     public DbSet<Attachment> Attachments { get; set; }
     public DbSet<UserSkill>  UserSkills { get; set; }
     public DbSet<CompanyCategory>  CompanyCategories { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

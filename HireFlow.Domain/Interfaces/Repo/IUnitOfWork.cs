@@ -10,5 +10,6 @@ public interface IUnitOfWork
     ICategoryRepository Categories { get; }
     IAttachmentRepository Attachments { get; }
     ISkillRepository Skills { get; }
+    IRefreshTokenRepository RefreshTokens { get; }
     Task<int> SaveChangesAsync();
 }

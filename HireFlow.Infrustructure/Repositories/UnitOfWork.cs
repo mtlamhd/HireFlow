@@ -15,6 +15,7 @@ public class UnitOfWork : IUnitOfWork
     public ICategoryRepository Categories { get; }
     public IAttachmentRepository Attachments { get; }
     public ISkillRepository Skills { get; }
+    public IRefreshTokenRepository RefreshTokens { get; }
     public UnitOfWork(
         AppDbContext context,
         ICompanyRepository companies,
@@ -23,7 +24,7 @@ public class UnitOfWork : IUnitOfWork
         IProvinceRepository provinces,
         ICityRepository cities,
         ICategoryRepository categories,
-        IAttachmentRepository attachments, ISkillRepository skills)
+        IAttachmentRepository attachments, ISkillRepository skills, IRefreshTokenRepository refreshTokens)
     {
         _context = context;
         Companies = companies;
@@ -34,6 +35,7 @@ public class UnitOfWork : IUnitOfWork
         Categories = categories;
         Attachments = attachments;
         Skills = skills;
+        RefreshTokens = refreshTokens;
     }
 
     public async Task<int> SaveChangesAsync()

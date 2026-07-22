@@ -9,4 +9,8 @@ public interface IAuthenticationService
     Task<RegisterResultDto> RegisterEmployerAsync(RegisterEmployerDto dto);
     
     Task<LoginResultDto> TokenLoginAsync(LoginDto dto);  
+    
+    Task<LoginResultDto> RefreshTokenAsync(RefreshTokenDto dto);
+    
+    Task LogoutAsync(RefreshTokenDto dto);
 }
