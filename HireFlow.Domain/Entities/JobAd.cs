@@ -28,6 +28,10 @@ public class JobAd : BaseEntity, IValidatableEntity
 
     public EmploymentTypeEnum EmploymentType { get; private set; }
     public DateTime? HighlightExpireAt { get; private set; }
+    public bool IsFeatured { get; private set; } = false;
+    public DateTime? FeaturedUntil { get; private set; }
+    
+    
 
     public ICollection<Request> Requests { get; private set; } = new List<Request>();
     
@@ -115,6 +119,29 @@ public class JobAd : BaseEntity, IValidatableEntity
     {
         return HighlightExpireAt.HasValue &&
                HighlightExpireAt > DateTime.UtcNow;
+    }
+    public void MakeFeatured(DateTime expiresAt, Guid requesterId)
+    {
+        if (expiresAt <= DateTime.UtcNow)
+            throw new ValidationException("Featured expiration date must be in the future.", 3010);
+    
+        IsFeatured = true;
+        FeaturedUntil = expiresAt;
+        SetModificationInfo(requesterId);
+    }
+    
+    public void CancelFeatured(Guid requesterId)
+    {
+        IsFeatured = false;
+        FeaturedUntil = null;
+        SetModificationInfo(requesterId);
+    }
+    
+    public bool IsFeaturedActive()
+    {
+        return IsFeatured && 
+               FeaturedUntil.HasValue && 
+               FeaturedUntil.Value > DateTime.UtcNow;
     }
 
 

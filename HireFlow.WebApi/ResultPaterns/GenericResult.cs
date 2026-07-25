@@ -6,8 +6,7 @@ public class GenericResult<T>
     public T? Data { get; private set; }
     public string? Message { get; private set; }
     public int StatusCode { get; private set; }
-
-    public static GenericResult<T> Success(T data, string? message = null, int statusCode = 200)
+   public static GenericResult<T> Success(T data, string? message = null, int statusCode = 200)
     {
         return new GenericResult<T>
         {
@@ -18,6 +17,7 @@ public class GenericResult<T>
         };
     }
 
+    
     public static GenericResult<T> Failure(string message, int statusCode = 400)
     {
         return new GenericResult<T>

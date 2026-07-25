@@ -49,6 +49,11 @@ public class JobAdModelBuilderConfiguration : BaseModelBuilderConfiguration<JobA
         
         modelBuilder.HasIndex(j => j.Title);
         modelBuilder.HasIndex(j => j.CompanyId);
+        modelBuilder.Property(j => j.IsFeatured)
+            .HasDefaultValue(false);
+
+        modelBuilder.Property(j => j.FeaturedUntil)
+            .IsRequired(false);
         
         modelBuilder.HasOne(e => e.City)
             .WithMany(e => e.JobAds)
