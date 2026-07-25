@@ -17,4 +17,8 @@ public interface IUserRepository
     
     Task<List<AdminJobSeekerSummaryDto>> GetAllJobSeekersAsync(string roleName);
     Task<AdminJobSeekerDetailsDto?> GetJobSeekerDetailsForAdminAsync(Guid id);
+    
+    Task<EmployerProfileDto?> GetEmployerProfileByIdAsync(Guid userId);
+    
+    Task<bool> UpdateEmployerProfileAsync(Guid userId, UpdateEmployerProfileDto dto, Guid requesterId);
 }

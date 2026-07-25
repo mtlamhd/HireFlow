@@ -1,6 +1,7 @@
 using HireFlow.Business.Authentications;
 using HireFlow.Business.Services;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
+using HireFlow.Domain.Interfaces.Repo;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HireFlow.Business;
@@ -20,6 +21,7 @@ public static class ServicesDependencyInjection
         services.AddScoped<ISkillService, SkillService>();
         services.AddScoped<IRequestService, RequestService>();
         services.AddScoped<IJobSeekerProfileService,JobSeekerProfileService>();
+        services.AddScoped<IEmployerProfileService, EmployerProfileService>();
         return services;
     }
 }

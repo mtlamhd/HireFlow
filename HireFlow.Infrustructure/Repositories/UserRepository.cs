@@ -205,4 +205,43 @@ namespace HireFlow.Infrustructure.Repositories;
                 .FirstOrDefaultAsync();
         }
         
+        public async Task<EmployerProfileDto?> GetEmployerProfileByIdAsync(Guid userId)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => new EmployerProfileDto
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Username = u.UserName!,
+                    Email = u.Email,
+                    BirthDate = u.BirthDate,
+                    NationalId = u.NationalId,
+                    ProfileImageId = u.ProfileImageId,
+                    IsApproved = u.IsApproved
+                })
+                .FirstOrDefaultAsync();
+        }
+        public async Task<bool> UpdateEmployerProfileAsync(Guid userId, UpdateEmployerProfileDto dto, Guid requesterId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+           
+            user.UpdateProfile(dto.FirstName, dto.LastName, requesterId);
+            user.CompletePersonalInfo(dto.NationalId, dto.BirthDate, requesterId);
+            user.Email = dto.Email;
+            user.NormalizedEmail = dto.Email.ToUpper();
+
+           
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        
+        
     }
