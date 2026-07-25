@@ -14,11 +14,13 @@ public class AdminService : IAdminService
 {
     private readonly UserManager<User> _userManager;
     private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public AdminService(UserManager<User> userManager, IUserRepository userRepository)
+    public AdminService(UserManager<User> userManager, IUserRepository userRepository, IUnitOfWork unitOfWork)
     {
         _userManager = userManager;
         _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task ApproveEmployerAsync(Guid userId, Guid requesterId)
@@ -106,4 +108,94 @@ public class AdminService : IAdminService
         }
 
     }
+    public async Task<List<AdminJobAdSummaryDto>> GetAllJobAdsForAdminAsync()
+    {
+        return await _unitOfWork.JobAds.GetAllJobAdsForAdminAsync();
+    }
+    public async Task<AdminJobAdDetailsDto> GetJobAdDetailsForAdminAsync(Guid id)
+    {
+        if (id == Guid.Empty)
+            throw new InvalidRequestException("Job Ad ID cannot be empty.");
+
+        var detailsDto = await _unitOfWork.JobAds.GetJobAdDetailsForAdminAsync(id);
+
+        if (detailsDto == null)
+            throw new ItemNotFoundException("JobAd", id);
+
+        return detailsDto;
+    }
+    public async Task ActivateJobAdAsync(Guid id, Guid requesterId)
+    {
+        if (id == Guid.Empty)
+            throw new InvalidRequestException("Job Ad ID cannot be empty.");
+
+       
+        var jobAd = await _unitOfWork.JobAds.GetByIdAsync(id, tracking: true);
+        if (jobAd == null)
+            throw new ItemNotFoundException("JobAd", id);
+
+     
+        jobAd.Activate(requesterId);
+
+        await _unitOfWork.SaveChangesAsync();
+    }
+    public async Task DeactivateJobAdAsync(Guid id, Guid requesterId)
+    {
+        if (id == Guid.Empty)
+            throw new InvalidRequestException("Job Ad ID cannot be empty.");
+
+        var jobAd = await _unitOfWork.JobAds.GetByIdAsync(id, tracking: true);
+        if (jobAd == null)
+            throw new ItemNotFoundException("JobAd", id);
+
+        jobAd.Deactivate(requesterId);
+
+        await _unitOfWork.SaveChangesAsync();
+    }
+    public async Task SoftDeleteJobAdAsync(Guid id, Guid requesterId)
+    {
+        if (id == Guid.Empty)
+            throw new InvalidRequestException("Job Ad ID cannot be empty.");
+
+        var jobAd = await _unitOfWork.JobAds.GetByIdAsync(id, tracking: true);
+        if (jobAd == null)
+            throw new ItemNotFoundException("JobAd", id);
+
+       
+        _unitOfWork.JobAds.SoftDelete(jobAd, requesterId);
+
+        await _unitOfWork.SaveChangesAsync();
+    }
+    
+    public async Task MakeJobAdFeaturedAsync(Guid id, DateTime expiresAt, Guid requesterId)
+    {
+        if (id == Guid.Empty)
+            throw new InvalidRequestException("Job Ad ID cannot be empty.");
+
+        if (expiresAt <= DateTime.UtcNow)
+            throw new InvalidRequestException("Featured expiration date must be in the future.");
+
+        var jobAd = await _unitOfWork.JobAds.GetByIdAsync(id, tracking: true);
+        if (jobAd == null)
+            throw new ItemNotFoundException("JobAd", id);
+
+       
+        jobAd.MakeFeatured(expiresAt, requesterId);
+
+        await _unitOfWork.SaveChangesAsync();
+    }
+    public async Task CancelJobAdFeaturedAsync(Guid id, Guid requesterId)
+    {
+        if (id == Guid.Empty)
+            throw new InvalidRequestException("Job Ad ID cannot be empty.");
+
+        var jobAd = await _unitOfWork.JobAds.GetByIdAsync(id, tracking: true);
+        if (jobAd == null)
+            throw new ItemNotFoundException("JobAd", id);
+        
+        jobAd.CancelFeatured(requesterId);
+
+        await _unitOfWork.SaveChangesAsync();
+    }
+
 }

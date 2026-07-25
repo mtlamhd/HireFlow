@@ -1,3 +1,4 @@
+using HireFlow.Domain.Dtos.AdminDto;
 using HireFlow.Domain.Dtos.JobAdDto;
 using HireFlow.Domain.Entities;
 
@@ -12,4 +13,6 @@ public interface IJobAdRepository : IGenericRepository<JobAd>
     Task<List<PublicJobAdSummaryDto>> GetActiveJobAdsAsync(Paging paging);
     Task<PublicJobAdDetailsDto?> GetPublicJobAdDetailsAsync(Guid id);
     Task<List<PublicJobAdSummaryDto>> SearchActiveJobAdsAsync(JobAdSearchDto dto);
+    Task<List<AdminJobAdSummaryDto>> GetAllJobAdsForAdminAsync();
+    Task<AdminJobAdDetailsDto?> GetJobAdDetailsForAdminAsync(Guid id);
 }

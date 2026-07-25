@@ -1,3 +1,4 @@
+using HireFlow.Domain.Dtos.AdminDto;
 using HireFlow.Domain.Dtos.CategoryDto;
 using HireFlow.Domain.Dtos.JobAdDto;
 using HireFlow.Domain.Dtos.SkillDto;
@@ -245,4 +246,64 @@ public class JobAdRepository : GenericRepository<JobAd> , IJobAdRepository
         CreatedAt = j.CreatedAt
     }).ToListAsync();
   }
+    
+    public async Task<List<AdminJobAdSummaryDto>> GetAllJobAdsForAdminAsync()
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .OrderByDescending(j => j.CreatedAt)
+            .Select(j => new AdminJobAdSummaryDto
+            {
+                Id = j.Id,
+                Title = j.Title,
+                CompanyName = j.Company.Name,
+                CityName = j.City.Name,
+                CategoryName = j.Category.Name,
+                Salary = j.Salary,
+                EmploymentType = j.EmploymentType,
+                IsActive = j.IsActive,
+                IsFeatured = j.IsFeatured,
+                FeaturedUntil = j.FeaturedUntil,
+                ExpireAt = j.ExpireAt,
+                CreatedAt = j.CreatedAt,
+                ApplicationsCount = j.Requests.Count 
+            })
+            .ToListAsync();
+    }
+
+    public async Task<AdminJobAdDetailsDto?> GetJobAdDetailsForAdminAsync(Guid id)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(j => j.Id == id)
+            .Select(j => new AdminJobAdDetailsDto
+            {
+                Id = j.Id,
+                Title = j.Title,
+                Description = j.Description,
+                Salary = j.Salary,
+                EmploymentType = j.EmploymentType,
+                IsActive = j.IsActive,
+                ExpireAt = j.ExpireAt,
+                CreatedAt = j.CreatedAt,
+                HighlightExpireAt = j.HighlightExpireAt,
+                IsHighlighted = j.HighlightExpireAt.HasValue && j.HighlightExpireAt.Value > DateTime.UtcNow,
+                IsFeatured = j.IsFeatured,
+                FeaturedUntil = j.FeaturedUntil,
+                IsFeaturedActive = j.IsFeatured && j.FeaturedUntil.HasValue && j.FeaturedUntil.Value > DateTime.UtcNow,
+                CompanyId = j.CompanyId,
+                CompanyName = j.Company.Name,
+                CompanyLogoId = j.Company.LogoId,
+                CityName = j.City.Name,
+                ProvinceName = j.City.Province.Name,
+                CategoryName = j.Category.Name,
+                Skills = j.JobAdSkills.Select(jas => new SkillViewDto
+                {
+                    Id = jas.Skill.Id,
+                    Name = jas.Skill.Name
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
+    }
+
 } 

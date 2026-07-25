@@ -196,7 +196,7 @@ namespace HireFlow.Infrustructure.Repositories;
                     CreatedAt = u.CreatedAt,
                     ResumeId = u.ResumeId,
                     ResumeFileName = u.Resume != null ? u.Resume.FileName : null,
-                    Skills = u.UserSkills.Select(us => new SkillViewDto()
+                    Skills = u.UserSkills.Select(us => new SkillViewDto
                     {
                         Id = us.Skill.Id,
                         Name = us.Skill.Name

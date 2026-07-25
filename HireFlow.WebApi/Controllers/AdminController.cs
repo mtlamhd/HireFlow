@@ -2,6 +2,7 @@ using System.Security.Claims;
 using HireFlow.Business.Authentications.Constants;
 using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.AdminDto;
+using HireFlow.Domain.Dtos.JobAdDto;
 using HireFlow.Domain.Dtos.UserDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
 using HireFlow.WebApi.ResultPaterns;
@@ -98,4 +99,95 @@ public class AdminController : ControllerBase
 
         return Ok(Result.Success("Job seeker account has been deactivated successfully."));
     }
+    [HttpGet("job-ads")]
+    public async Task<IActionResult> GetAllJobAds()
+    {
+        var jobAds = await _adminService.GetAllJobAdsForAdminAsync();
+
+        return Ok(
+            GenericResult<List<AdminJobAdSummaryDto>>.Success(jobAds));
+    }
+
+    [HttpGet("job-ads/{id}")]
+    public async Task<IActionResult> GetJobAdDetails(Guid id)
+    {
+        var jobAd = await _adminService.GetJobAdDetailsForAdminAsync(id);
+
+        return Ok(
+            GenericResult<AdminJobAdDetailsDto>.Success(jobAd));
+    }
+
+    [HttpPut("job-ads/{id}/activate")]
+    public async Task<IActionResult> ActivateJobAd(Guid id)
+    {
+        var adminId = GetCurrentAdminId();
+
+        await _adminService.ActivateJobAdAsync(id, adminId);
+
+        return Ok(
+            Result.Success("Job ad activated successfully."));
+    }
+
+    [HttpPut("job-ads/{id}/deactivate")]
+    public async Task<IActionResult> DeactivateJobAd(Guid id)
+    {
+        var adminId = GetCurrentAdminId();
+
+        await _adminService.DeactivateJobAdAsync(id, adminId);
+
+        return Ok(
+            Result.Success("Job ad deactivated successfully."));
+    }
+
+    [HttpDelete("job-ads/{id}")]
+    public async Task<IActionResult> DeleteJobAd(Guid id)
+    {
+        var adminId = GetCurrentAdminId();
+
+        await _adminService.SoftDeleteJobAdAsync(id, adminId);
+
+        return Ok(
+            Result.Success("Job ad deleted successfully."));
+    }
+
+    [HttpPut("job-ads/{id}/featured")]
+    public async Task<IActionResult> MakeJobAdFeatured(
+        Guid id,
+        [FromBody] MakeJobAdFeaturedDto dto)
+    {
+        var adminId = GetCurrentAdminId();
+
+        await _adminService.MakeJobAdFeaturedAsync(
+            id,
+            dto.FeaturedUntil,
+            adminId);
+
+        return Ok(
+            Result.Success("Job ad marked as featured successfully."));
+    }
+
+    [HttpDelete("job-ads/{id}/featured")]
+    public async Task<IActionResult> CancelJobAdFeatured(Guid id)
+    {
+        var adminId = GetCurrentAdminId();
+
+        await _adminService.CancelJobAdFeaturedAsync(id, adminId);
+
+        return Ok(
+            Result.Success("Featured status removed successfully."));
+    }
+    private Guid GetCurrentAdminId()
+    {
+        var adminIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrWhiteSpace(adminIdClaim) ||
+            !Guid.TryParse(adminIdClaim, out var adminId))
+        {
+            throw new ResourceAccessDeniedException(
+                "Admin identity claim was not found or is invalid.");
+        }
+
+        return adminId;
+    }
+    
 }
