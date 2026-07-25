@@ -15,12 +15,14 @@ public class AdminService : IAdminService
     private readonly UserManager<User> _userManager;
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAdminDashboardRepository _adminDashboardRepository;
 
-    public AdminService(UserManager<User> userManager, IUserRepository userRepository, IUnitOfWork unitOfWork)
+    public AdminService(UserManager<User> userManager, IUserRepository userRepository, IUnitOfWork unitOfWork, IAdminDashboardRepository adminDashboardRepository)
     {
         _userManager = userManager;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
+        _adminDashboardRepository = adminDashboardRepository;
     }
 
     public async Task ApproveEmployerAsync(Guid userId, Guid requesterId)
@@ -196,6 +198,12 @@ public class AdminService : IAdminService
         jobAd.CancelFeatured(requesterId);
 
         await _unitOfWork.SaveChangesAsync();
+    }
+    public async Task<AdminDashboardStatsDto> GetDashboardStatsAsync()
+    {
+        return await _adminDashboardRepository.GetDashboardStatsAsync(
+            RoleConstants.JobSeekerRoleName, 
+            RoleConstants.EmployerRoleName);
     }
 
 }

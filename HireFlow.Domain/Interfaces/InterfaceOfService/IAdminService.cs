@@ -23,4 +23,6 @@ public interface IAdminService
     
     Task CancelJobAdFeaturedAsync(Guid id, Guid requesterId);
     
+    Task<AdminDashboardStatsDto> GetDashboardStatsAsync();
+    
 }

@@ -189,5 +189,11 @@ public class AdminController : ControllerBase
 
         return adminId;
     }
-    
+    [HttpGet("dashboard-stats")]
+    public async Task<IActionResult> GetDashboardStats()
+    {
+        var stats = await _adminService.GetDashboardStatsAsync();
+
+        return Ok(GenericResult<AdminDashboardStatsDto>.Success(stats, "Dashboard statistics retrieved successfully."));
+    }
 }

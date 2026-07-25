@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
         return services;
     }
 }
