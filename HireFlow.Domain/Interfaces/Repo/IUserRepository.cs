@@ -1,3 +1,4 @@
+using HireFlow.Domain.Dtos.AdminDto;
 using HireFlow.Domain.Dtos.UserDto;
 
 namespace HireFlow.Domain.Interfaces.Repo;
@@ -13,4 +14,7 @@ public interface IUserRepository
     
     Task<bool> SetUserProfileImageAsync(Guid userId, Guid attachmentId, Guid requesterId);
     Task<bool> RemoveUserProfileImageAsync(Guid userId, Guid requesterId);
+    
+    Task<List<AdminJobSeekerSummaryDto>> GetAllJobSeekersAsync(string roleName);
+    Task<AdminJobSeekerDetailsDto?> GetJobSeekerDetailsForAdminAsync(Guid id);
 }
