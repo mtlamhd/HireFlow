@@ -201,9 +201,18 @@ public class AdminService : IAdminService
     }
     public async Task<AdminDashboardStatsDto> GetDashboardStatsAsync()
     {
-        return await _adminDashboardRepository.GetDashboardStatsAsync(
+       
+        var stats = await _adminDashboardRepository.GetDashboardStatsAsync(
             RoleConstants.JobSeekerRoleName, 
             RoleConstants.EmployerRoleName);
+
+       
+        if (stats == null)
+        {
+            throw new ItemNotFoundException("Dashboard statistics could not be retrieved from the database.");
+        }
+
+        return stats;
     }
     public async Task<List<AdminEmployerSummaryDto>> GetAllEmployersAsync()
     {
