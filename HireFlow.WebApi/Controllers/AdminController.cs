@@ -196,4 +196,30 @@ public class AdminController : ControllerBase
 
         return Ok(GenericResult<AdminDashboardStatsDto>.Success(stats, "Dashboard statistics retrieved successfully."));
     }
+    
+    [HttpGet("employers")]
+    public async Task<IActionResult> GetAllEmployers()
+    {
+        var employers = await _adminService.GetAllEmployersAsync();
+
+        return Ok(GenericResult<List<AdminEmployerSummaryDto>>.Success(employers));
+    }
+    
+    [HttpGet("employers/{userId}")]
+    public async Task<IActionResult> GetEmployerDetails(Guid userId)
+    {
+        var details = await _adminService.GetEmployerDetailsAsync(userId);
+
+        return Ok(GenericResult<AdminEmployerDetailsDto>.Success(details));
+    }
+    
+    [HttpPost("disapprove-employer/{userId}")]
+    public async Task<IActionResult> DisapproveEmployer(Guid userId)
+    {
+        var adminId = GetCurrentAdminId();
+
+        await _adminService.DisapproveEmployerAsync(userId, adminId);
+
+        return Ok(Result.Success("Employer has been disapproved successfully."));
+    }
 }

@@ -24,5 +24,10 @@ public interface IAdminService
     Task CancelJobAdFeaturedAsync(Guid id, Guid requesterId);
     
     Task<AdminDashboardStatsDto> GetDashboardStatsAsync();
+    Task<List<AdminEmployerSummaryDto>> GetAllEmployersAsync();
+    
+    Task<AdminEmployerDetailsDto> GetEmployerDetailsAsync(Guid userId);
+    
+    Task DisapproveEmployerAsync(Guid userId, Guid requesterId);
     
 }

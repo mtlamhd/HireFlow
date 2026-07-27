@@ -205,5 +205,46 @@ public class AdminService : IAdminService
             RoleConstants.JobSeekerRoleName, 
             RoleConstants.EmployerRoleName);
     }
+    public async Task<List<AdminEmployerSummaryDto>> GetAllEmployersAsync()
+    {
+       
+        return await _userRepository.GetAllEmployersForAdminAsync(RoleConstants.EmployerRoleName);
+    }
+
+
+    public async Task<AdminEmployerDetailsDto> GetEmployerDetailsAsync(Guid userId)
+    {
+        if (userId == Guid.Empty)
+            throw new InvalidRequestException("User ID cannot be empty.");
+
+        var detailsDto = await _userRepository.GetEmployerDetailsForAdminAsync(userId);
+
+        
+        if (detailsDto == null)
+            throw new ItemNotFoundException("Employer", userId);
+
+        return detailsDto;
+    }
+
+
+    public async Task DisapproveEmployerAsync(Guid userId, Guid requesterId)
+    {
+        if (userId == Guid.Empty)
+            throw new InvalidRequestException("User ID cannot be empty.");
+
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+            throw new ItemNotFoundException("User", userId);
+
+        
+        user.Disapprove(requesterId);
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            var errorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
+            throw new IdentityOperationException("Employer Disapproval", errorMessage);
+        }
+    }
 
 }

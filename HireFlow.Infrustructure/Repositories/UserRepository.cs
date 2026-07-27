@@ -1,4 +1,5 @@
 using HireFlow.Domain.Dtos.AdminDto;
+using HireFlow.Domain.Dtos.CategoryDto;
 using HireFlow.Domain.Dtos.SkillDto;
 using HireFlow.Domain.Dtos.UserDto;
 using HireFlow.Domain.Entities;
@@ -241,6 +242,79 @@ namespace HireFlow.Infrustructure.Repositories;
            
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<List<AdminEmployerSummaryDto>> GetAllEmployersForAdminAsync(string employerRole)
+        {
+           
+            var roleId = await _context.Roles
+                .Where(r => r.Name == employerRole)
+                .Select(r => r.Id)
+                .FirstOrDefaultAsync();
+        
+            if (roleId == Guid.Empty)
+                return new List<AdminEmployerSummaryDto>();
+        
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => _context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == roleId))
+                .OrderByDescending(u => u.CreatedAt)
+                .Select(u => new AdminEmployerSummaryDto
+                {
+                    UserId = u.Id,
+                    Username = u.UserName!,
+                 
+                    FullName = (string.IsNullOrWhiteSpace(u.FirstName) && string.IsNullOrWhiteSpace(u.LastName))
+                        ? null
+                        : (u.FirstName + " " + u.LastName).Trim(),
+                    CompanyName = u.Companies.Select(c => c.Name).FirstOrDefault() ?? "No Company",
+                    IsApproved = u.IsApproved,
+                    IsActive = u.IsActive,
+                    CreatedAt = u.CreatedAt
+                })
+                .ToListAsync();
+        }
+        
+      
+        public async Task<AdminEmployerDetailsDto?> GetEmployerDetailsForAdminAsync(Guid userId)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => new AdminEmployerDetailsDto
+                {
+                    UserId = u.Id,
+                    Username = u.UserName!,
+                    FullName = (string.IsNullOrWhiteSpace(u.FirstName) && string.IsNullOrWhiteSpace(u.LastName))
+                        ? null
+                        : (u.FirstName + " " + u.LastName).Trim(),
+                    Email = u.Email,
+                    NationalId = u.NationalId,
+                    IsApproved = u.IsApproved,
+                    IsActive = u.IsActive,
+                    CreatedAt = u.CreatedAt,
+                    
+                    CompanyId = u.Companies.Select(c => c.Id).FirstOrDefault(),
+                    CompanyName = u.Companies.Select(c => c.Name).FirstOrDefault() ?? string.Empty,
+                    CompanyDescription = u.Companies.Select(c => c.Description).FirstOrDefault(),
+                    CompanyWebsite = u.Companies.Select(c => c.Website).FirstOrDefault(),
+                    CompanyEmail = u.Companies.Select(c => c.Email).FirstOrDefault(),
+                    CompanyPhone = u.Companies.Select(c => c.PhoneNumber).FirstOrDefault(),
+                    CompanyAddress = u.Companies.Select(c => c.Address).FirstOrDefault(),
+                    CompanyLogoId = u.Companies.Select(c => c.LogoId).FirstOrDefault(),
+                    CityName = u.Companies.Select(c => c.City != null ? c.City.Name : null).FirstOrDefault(),
+                    ProvinceName = u.Companies.Select(c => (c.City != null && c.City.Province != null) ? c.City.Province.Name : null).FirstOrDefault(),
+        
+                   
+                    JobAdsCount = u.Companies.Select(c => c.JobAds.Count).FirstOrDefault(),
+        
+                 
+                    CompanyCategories = u.Companies.SelectMany(c => c.CompanyCategories.Select(cc => new CategoryViewDto
+                    {
+                        Id = cc.Category.Id,
+                        Name = cc.Category.Name
+                    })).ToList()
+                })
+                .FirstOrDefaultAsync();
         }
         
         

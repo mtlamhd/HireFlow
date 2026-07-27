@@ -21,4 +21,8 @@ public interface IUserRepository
     Task<EmployerProfileDto?> GetEmployerProfileByIdAsync(Guid userId);
     
     Task<bool> UpdateEmployerProfileAsync(Guid userId, UpdateEmployerProfileDto dto, Guid requesterId);
+    
+    Task<List<AdminEmployerSummaryDto>> GetAllEmployersForAdminAsync(string employerRole);
+    
+    Task<AdminEmployerDetailsDto?> GetEmployerDetailsForAdminAsync(Guid userId);
 }
