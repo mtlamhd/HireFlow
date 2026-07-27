@@ -130,10 +130,16 @@ public class JobAdRepository : GenericRepository<JobAd> , IJobAdRepository
     }
     public async Task<List<PublicJobAdSummaryDto>> GetActiveJobAdsAsync(Paging paging)
     {
+        var now = DateTime.UtcNow;
+
         return await _dbSet
             .AsNoTracking()
-            .Where(j => j.IsActive && j.ExpireAt > DateTime.UtcNow)
-            .OrderByDescending(j => j.HighlightExpireAt > DateTime.UtcNow) 
+            .Where(j => j.IsActive && j.ExpireAt > now)
+            
+            .OrderByDescending(j => j.IsFeatured && j.FeaturedUntil > now) 
+            
+            .ThenByDescending(j => j.HighlightExpireAt > now) 
+            
             .ThenByDescending(j => j.CreatedAt)
             .Skip(paging.GetSkip())
             .Take(paging.PageSize)
@@ -148,7 +154,8 @@ public class JobAdRepository : GenericRepository<JobAd> , IJobAdRepository
                 CategoryName = j.Category.Name,
                 Salary = j.Salary,
                 EmploymentType = j.EmploymentType,
-                IsHighlighted = j.HighlightExpireAt > DateTime.UtcNow,
+                IsHighlighted = j.HighlightExpireAt > now,
+                IsFeatured = j.IsFeatured && j.FeaturedUntil > now,
                 CreatedAt = j.CreatedAt
             })
             .ToListAsync();
@@ -185,10 +192,12 @@ public class JobAdRepository : GenericRepository<JobAd> , IJobAdRepository
     
     public async Task<List<PublicJobAdSummaryDto>> SearchActiveJobAdsAsync(JobAdSearchDto dto)
 {
+    var now = DateTime.UtcNow;
     
     var query = _dbSet.AsNoTracking()
-        .Where(j => j.IsActive && j.ExpireAt > DateTime.UtcNow);
+        .Where(j => j.IsActive && j.ExpireAt > now);
 
+    // اعمال فیلترهای پویا
     if (!string.IsNullOrWhiteSpace(dto.Title))
     {
         query = query.Where(j => j.Title.Contains(dto.Title));
@@ -204,33 +213,28 @@ public class JobAdRepository : GenericRepository<JobAd> , IJobAdRepository
         query = query.Where(j => j.CityId == dto.CityId.Value);
     }
 
-   
     if (dto.CategoryId.HasValue && dto.CategoryId.Value != Guid.Empty)
     {
         query = query.Where(j => j.CategoryId == dto.CategoryId.Value);
     }
 
-   
     if (dto.MinSalary.HasValue)
     {
         query = query.Where(j => j.Salary.HasValue && j.Salary.Value >= dto.MinSalary.Value);
     }
 
-   
     if (dto.SkillIds != null && dto.SkillIds.Any())
     {
         var uniqueSkillIds = dto.SkillIds.Distinct().ToList();
         query = query.Where(j => j.JobAdSkills.Any(jas => uniqueSkillIds.Contains(jas.SkillId)));
     }
+    
+    query = query.OrderByDescending(j => j.IsFeatured && j.FeaturedUntil > now)
+                 .ThenByDescending(j => j.HighlightExpireAt > now)            
+                 .ThenByDescending(j => j.CreatedAt);                         
 
-   
-    query = query.OrderByDescending(j => j.HighlightExpireAt > DateTime.UtcNow)
-                 .ThenByDescending(j => j.CreatedAt);
-
-   
     query = query.Skip(dto.GetSkip()).Take(dto.PageSize); 
 
-    
     return await query.Select(j => new PublicJobAdSummaryDto
     {
         Id = j.Id,
@@ -242,11 +246,11 @@ public class JobAdRepository : GenericRepository<JobAd> , IJobAdRepository
         CategoryName = j.Category.Name,
         Salary = j.Salary,
         EmploymentType = j.EmploymentType,
-        IsHighlighted = j.HighlightExpireAt > DateTime.UtcNow,
+        IsHighlighted = j.HighlightExpireAt > now,
+        IsFeatured = j.IsFeatured && j.FeaturedUntil > now, 
         CreatedAt = j.CreatedAt
     }).ToListAsync();
-  }
-    
+}
     public async Task<List<AdminJobAdSummaryDto>> GetAllJobAdsForAdminAsync()
     {
         return await _dbSet

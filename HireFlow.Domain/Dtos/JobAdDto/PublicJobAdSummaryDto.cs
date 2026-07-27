@@ -14,5 +14,6 @@ public class PublicJobAdSummaryDto
     public decimal? Salary { get; set; }
     public EmploymentTypeEnum EmploymentType { get; set; }
     public bool IsHighlighted { get; set; }
+    public bool IsFeatured { get; set; }
     public DateTime CreatedAt { get; set; }
 }
