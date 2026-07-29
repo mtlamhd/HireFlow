@@ -1,6 +1,7 @@
 using System.Text;
 using HireFlow.Business;
 using HireFlow.Business.Authentications;
+using HireFlow.Business.Emails;
 using HireFlow.Domain.Entities;
 using HireFlow.Infrustructure;
 using HireFlow.Infrustructure.Data;
@@ -37,6 +38,7 @@ builder.Services
 var jwtSettings = builder.Configuration.GetSection("JwtConfigurations").Get<JwtSettings>()!;
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtConfigurations"));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 builder.Services.AddAuthentication(options =>
 {
