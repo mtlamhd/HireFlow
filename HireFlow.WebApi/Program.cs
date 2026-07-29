@@ -1,10 +1,10 @@
 using System.Text;
 using HireFlow.Business;
 using HireFlow.Business.Authentications;
-using HireFlow.Business.Emails;
 using HireFlow.Domain.Entities;
 using HireFlow.Infrustructure;
 using HireFlow.Infrustructure.Data;
+using HireFlow.Infrustructure.EmailServices;
 using HireFlow.WebApi.Extentions;
 using HireFlow.WebApi.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

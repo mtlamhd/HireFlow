@@ -1,5 +1,7 @@
+using HireFlow.Domain.Interfaces.InterfaceOfService;
 using HireFlow.Domain.Interfaces.Repo;
 using HireFlow.Infrustructure.Data;
+using HireFlow.Infrustructure.EmailServices;
 using HireFlow.Infrustructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
+        services.AddScoped<IEmailService, EmailService>();
         return services;
     }
 }

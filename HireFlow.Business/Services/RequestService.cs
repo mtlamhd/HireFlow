@@ -13,11 +13,13 @@ public class RequestService : IRequestService
     
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<User> _userManager;
+        private readonly IEmailService _emailService;
 
-        public RequestService(IUnitOfWork unitOfWork, UserManager<User> userManager)
+        public RequestService(IUnitOfWork unitOfWork, UserManager<User> userManager, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _emailService = emailService;
         }
         
         public async Task<List<RequestSummaryDto>> GetJobAdRequestsAsync(Guid userId, Guid jobAdId)
@@ -84,6 +86,41 @@ public class RequestService : IRequestService
                     throw new InvalidRequestException("Invalid status transition. Employers are not allowed to set this status.");
             }
             await _unitOfWork.SaveChangesAsync();
+            var jobSeeker = await _userManager.FindByIdAsync(request.UserId.ToString());
+            if (jobSeeker != null && !string.IsNullOrWhiteSpace(jobSeeker.Email))
+            {
+                var jobAd = await _unitOfWork.JobAds.GetByIdAsync(request.JobAdId);
+                if (jobAd != null)
+                {
+                    
+                    var jobSeekerName = (string.IsNullOrWhiteSpace(jobSeeker.FirstName) && string.IsNullOrWhiteSpace(jobSeeker.LastName))
+                        ? jobSeeker.UserName!
+                        : $"{jobSeeker.FirstName} {jobSeeker.LastName}".Trim();
+
+                   
+                    var placeholders = new Dictionary<string, string>
+                    {
+                        { "{Name}", jobSeekerName },
+                        { "{JobTitle}", jobAd.Title },
+                        { "{CompanyName}", company.Name }
+                    };
+
+                    
+                    EmailEventTypeEnum? emailType = dto.NewStatus switch
+                    {
+                        RequestStatusEnum.UnderReview => EmailEventTypeEnum.RequestUnderReview,
+                        RequestStatusEnum.Interview => EmailEventTypeEnum.RequestInterview,
+                        RequestStatusEnum.Accepted => EmailEventTypeEnum.RequestAccepted,
+                        RequestStatusEnum.Rejected => EmailEventTypeEnum.RequestRejected,
+                        _ => null
+                    };
+                    
+                    if (emailType.HasValue)
+                    {
+                        await _emailService.SendEmailFromTemplateAsync(jobSeeker.Email, emailType.Value, placeholders);
+                    }
+                }
+            }
         }
         
         private async Task<Company> GetApprovedCompanyAsync(Guid userId)
@@ -165,6 +202,32 @@ public class RequestService : IRequestService
             
             await _unitOfWork.Requests.AddAsync(request);
             await _unitOfWork.SaveChangesAsync();
+            var company = await _unitOfWork.Companies.GetFirstOrDefaultAsync(c => c.Id == jobAd.CompanyId);
+            if (company != null)
+            {
+                var employer = await _userManager.FindByIdAsync(company.OwnerId.ToString());
+                if (employer != null && !string.IsNullOrWhiteSpace(employer.Email))
+                {
+                  
+                    var jobSeekerName = (string.IsNullOrWhiteSpace(user.FirstName) && string.IsNullOrWhiteSpace(user.LastName))
+                        ? user.UserName!
+                        : $"{user.FirstName} {user.LastName}".Trim();
+
+                   
+                    var placeholders = new Dictionary<string, string>
+                    {
+                        { "{CompanyName}", company.Name },
+                        { "{Name}", jobSeekerName },
+                        { "{JobTitle}", jobAd.Title }
+                    };
+
+                    
+                    await _emailService.SendEmailFromTemplateAsync(
+                        employer.Email, 
+                        EmailEventTypeEnum.NewApplicationReceived, 
+                        placeholders);
+                }
+            }
         }
         
         public async Task<List<JobSeekerRequestSummaryDto>> GetJobSeekerRequestsAsync(Guid userId)

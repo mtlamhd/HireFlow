@@ -3,6 +3,7 @@ using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.AdminDto;
 using HireFlow.Domain.Dtos.UserDto;
 using HireFlow.Domain.Entities;
+using HireFlow.Domain.Enums;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
 using HireFlow.Domain.Interfaces.Repo;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +17,7 @@ public class AdminService : IAdminService
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAdminDashboardRepository _adminDashboardRepository;
+    private readonly IEmailService _emailService;
 
     public AdminService(UserManager<User> userManager, IUserRepository userRepository, IUnitOfWork unitOfWork, IAdminDashboardRepository adminDashboardRepository)
     {
@@ -40,6 +42,25 @@ public class AdminService : IAdminService
         {
             var errorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
             throw new IdentityOperationException("Employer Approval", errorMessage);
+        }
+        if (!string.IsNullOrWhiteSpace(user.Email))
+        {
+            var company = await _unitOfWork.Companies.GetFirstOrDefaultAsync(c => c.OwnerId == userId);
+            
+            var employerName = (string.IsNullOrWhiteSpace(user.FirstName) && string.IsNullOrWhiteSpace(user.LastName))
+                ? user.UserName!
+                : $"{user.FirstName} {user.LastName}".Trim();
+
+            var placeholders = new Dictionary<string, string>
+            {
+                { "{Name}", employerName },
+                { "{CompanyName}", company?.Name ?? "ثبت‌نشده" }
+            };
+
+            await _emailService.SendEmailFromTemplateAsync(
+                user.Email, 
+                EmailEventTypeEnum.EmployerApproved, 
+                placeholders);
         }
     }
 
@@ -254,6 +275,26 @@ public class AdminService : IAdminService
             var errorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
             throw new IdentityOperationException("Employer Disapproval", errorMessage);
         }
+        if (!string.IsNullOrWhiteSpace(user.Email))
+        {
+            var company = await _unitOfWork.Companies.GetFirstOrDefaultAsync(c => c.OwnerId == userId);
+            
+            var employerName = (string.IsNullOrWhiteSpace(user.FirstName) && string.IsNullOrWhiteSpace(user.LastName))
+                ? user.UserName!
+                : $"{user.FirstName} {user.LastName}".Trim();
+
+            var placeholders = new Dictionary<string, string>
+            {
+                { "{Name}", employerName },
+                { "{CompanyName}", company?.Name ?? "ثبت‌نشده" }
+            };
+
+            await _emailService.SendEmailFromTemplateAsync(
+                user.Email, 
+                EmailEventTypeEnum.EmployerDisapproved, 
+                placeholders);
+        }
     }
 
-}
+    }
+
