@@ -20,69 +20,56 @@ public class AdminDashboardRepository : IAdminDashboardRepository
 
     public async Task<AdminDashboardStatsDto> GetDashboardStatsAsync(string jobSeekerRole, string employerRole)
     {
+        var jobSeekerRoleId = await _context.Roles
+            .AsNoTracking()
+            .Where(r => r.Name == jobSeekerRole)
+            .Select(r => r.Id)
+            .FirstOrDefaultAsync();
+
+        var employerRoleId = await _context.Roles
+            .AsNoTracking()
+            .Where(r => r.Name == employerRole)
+            .Select(r => r.Id)
+            .FirstOrDefaultAsync();
+
+      
+        var totalJobSeekers = await _context.Users
+            .CountAsync(u => _context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == jobSeekerRoleId));
+
+        var totalEmployers = await _context.Users
+            .CountAsync(u => _context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == employerRoleId));
+
+        var totalPendingEmployers = await _context.Users
+            .CountAsync(u => !u.IsApproved && _context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == employerRoleId));
+
+        var totalActiveJobAds = await _context.JobAds
+            .CountAsync(j => j.IsActive && j.ExpireAt > DateTime.UtcNow);
+
+        var totalInactiveJobAds = await _context.JobAds
+            .CountAsync(j => !j.IsActive || j.ExpireAt <= DateTime.UtcNow);
+
         
-        var connectionString = _context.Database.GetDbConnection().ConnectionString;
+        var initialRequests = await _context.Requests.CountAsync(r => r.Status == RequestStatusEnum.Initial);
+        var underReviewRequests = await _context.Requests.CountAsync(r => r.Status == RequestStatusEnum.UnderReview);
+        var interviewRequests = await _context.Requests.CountAsync(r => r.Status == RequestStatusEnum.Interview);
+        var acceptedRequests = await _context.Requests.CountAsync(r => r.Status == RequestStatusEnum.Accepted);
+        var rejectedRequests = await _context.Requests.CountAsync(r => r.Status == RequestStatusEnum.Rejected);
+        var cancelledRequests = await _context.Requests.CountAsync(r => r.Status == RequestStatusEnum.Cancelled);
 
-       
-        const string sql = @"
-            SELECT 
-               
-                (SELECT COUNT(*) FROM AspNetUsers u 
-                 WHERE EXISTS (
-                     SELECT 1 FROM AspNetUserRoles ur 
-                     INNER JOIN AspNetRoles r ON ur.RoleId = r.Id 
-                     WHERE ur.UserId = u.Id AND r.Name = @JobSeekerRole
-                 ) AND u.IsDeleted = 0) AS TotalJobSeekers,
-
-                
-                (SELECT COUNT(*) FROM AspNetUsers u 
-                 WHERE EXISTS (
-                     SELECT 1 FROM AspNetUserRoles ur 
-                     INNER JOIN AspNetRoles r ON ur.RoleId = r.Id 
-                     WHERE ur.UserId = u.Id AND r.Name = @EmployerRole
-                 ) AND u.IsDeleted = 0) AS TotalEmployers,
-
-             
-                (SELECT COUNT(*) FROM AspNetUsers u 
-                 WHERE EXISTS (
-                     SELECT 1 FROM AspNetUserRoles ur 
-                     INNER JOIN AspNetRoles r ON ur.RoleId = r.Id 
-                     WHERE ur.UserId = u.Id AND r.Name = @EmployerRole
-                 ) AND u.IsApproved = 0 AND u.IsDeleted = 0) AS TotalPendingEmployers,
-
-             
-                (SELECT COUNT(*) FROM JobAds 
-                 WHERE IsActive = 1 AND ExpireAt > GETUTCDATE() AND IsDeleted = 0) AS TotalActiveJobAds,
-
-               
-                (SELECT COUNT(*) FROM JobAds 
-                 WHERE (IsActive = 0 OR ExpireAt <= GETUTCDATE()) AND IsDeleted = 0) AS TotalInactiveJobAds,
-
-             
-                (SELECT COUNT(*) FROM Requests WHERE Status = 0 AND IsDeleted = 0) AS InitialRequestsCount,
-                (SELECT COUNT(*) FROM Requests WHERE Status = 1 AND IsDeleted = 0) AS UnderReviewRequestsCount,
-                (SELECT COUNT(*) FROM Requests WHERE Status = 2 AND IsDeleted = 0) AS InterviewRequestsCount,
-                (SELECT COUNT(*) FROM Requests WHERE Status = 3 AND IsDeleted = 0) AS AcceptedRequestsCount,
-                (SELECT COUNT(*) FROM Requests WHERE Status = 4 AND IsDeleted = 0) AS RejectedRequestsCount,
-                (SELECT COUNT(*) FROM Requests WHERE Status = 5 AND IsDeleted = 0) AS CancelledRequestsCount
-        ";
-
-       
-        using var connection = new SqlConnection(connectionString);
-
-        if (connection.State == ConnectionState.Closed)
+      
+        return new AdminDashboardStatsDto
         {
-            await connection.OpenAsync();
-        }
-
-       
-        var stats = await connection.QuerySingleAsync<AdminDashboardStatsDto>(sql, new
-        {
-            JobSeekerRole = jobSeekerRole,
-            EmployerRole = employerRole
-        });
-
-        return stats;
+            TotalJobSeekers = totalJobSeekers,
+            TotalEmployers = totalEmployers,
+            TotalPendingEmployers = totalPendingEmployers,
+            TotalActiveJobAds = totalActiveJobAds,
+            TotalInactiveJobAds = totalInactiveJobAds,
+            InitialRequestsCount = initialRequests,
+            UnderReviewRequestsCount = underReviewRequests,
+            InterviewRequestsCount = interviewRequests,
+            AcceptedRequestsCount = acceptedRequests,
+            RejectedRequestsCount = rejectedRequests,
+            CancelledRequestsCount = cancelledRequests
+        };
     }
 }
-

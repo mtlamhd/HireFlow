@@ -1,4 +1,5 @@
 using HireFlow.Domain.Dtos.AdminDto;
+using HireFlow.Domain.Dtos.EmailDto;
 using HireFlow.Domain.Dtos.UserDto;
 
 namespace HireFlow.Domain.Interfaces.InterfaceOfService;
@@ -29,5 +30,11 @@ public interface IAdminService
     Task<AdminEmployerDetailsDto> GetEmployerDetailsAsync(Guid userId);
     
     Task DisapproveEmployerAsync(Guid userId, Guid requesterId);
+    
+    Task<List<EmailTemplateDto>> GetAllEmailTemplatesAsync();
+    Task<EmailTemplateDto> GetEmailTemplateByIdAsync(Guid id);
+    Task UpdateEmailTemplateAsync(Guid id, UpdateEmailTemplateDto dto, Guid requesterId);
+    Task ActivateEmailTemplateAsync(Guid id, Guid requesterId);
+    Task DeactivateEmailTemplateAsync(Guid id, Guid requesterId);
     
 }

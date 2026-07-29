@@ -11,5 +11,6 @@ public interface IUnitOfWork
     IAttachmentRepository Attachments { get; }
     ISkillRepository Skills { get; }
     IRefreshTokenRepository RefreshTokens { get; }
+    IEmailTemplateRepository EmailTemplates { get; }
     Task<int> SaveChangesAsync();
 }

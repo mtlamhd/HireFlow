@@ -2,6 +2,7 @@ using System.Security.Claims;
 using HireFlow.Business.Authentications.Constants;
 using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.AdminDto;
+using HireFlow.Domain.Dtos.EmailDto;
 using HireFlow.Domain.Dtos.JobAdDto;
 using HireFlow.Domain.Dtos.UserDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
@@ -221,5 +222,64 @@ public class AdminController : ControllerBase
         await _adminService.DisapproveEmployerAsync(userId, adminId);
 
         return Ok(Result.Success("Employer has been disapproved successfully."));
+    }
+    [HttpGet("email-templates")]
+    public async Task<IActionResult> GetAllEmailTemplates()
+    {
+        var templates = await _adminService.GetAllEmailTemplatesAsync();
+
+        return Ok(
+            GenericResult<List<EmailTemplateDto>>.Success(
+                templates,
+                "لیست تمامی قالب‌های ایمیل با موفقیت دریافت شد."
+            ));
+    }
+
+    [HttpGet("email-templates/{id}")]
+    public async Task<IActionResult> GetEmailTemplate(Guid id)
+    {
+        var template = await _adminService.GetEmailTemplateByIdAsync(id);
+
+        return Ok(
+            GenericResult<EmailTemplateDto>.Success(
+                template,
+                "جزئیات قالب ایمیل با موفقیت دریافت شد."
+            ));
+    }
+
+    [HttpPut("email-templates/{id}")]
+    public async Task<IActionResult> UpdateEmailTemplate(
+        Guid id, 
+        [FromBody] UpdateEmailTemplateDto dto)
+    {
+        // استخراج امن شناسه ادمین از Claimها
+        var adminId = GetCurrentAdminId();
+
+        await _adminService.UpdateEmailTemplateAsync(id, dto, adminId);
+
+        return Ok(
+            Result.Success("قالب ایمیل مورد نظر با موفقیت ویرایش شد."));
+    }
+
+    [HttpPut("email-templates/{id}/activate")]
+    public async Task<IActionResult> ActivateEmailTemplate(Guid id)
+    {
+        var adminId = GetCurrentAdminId();
+
+        await _adminService.ActivateEmailTemplateAsync(id, adminId);
+
+        return Ok(
+            Result.Success("ارسال ایمیل برای این رویداد با موفقیت فعال شد."));
+    }
+
+    [HttpPut("email-templates/{id}/deactivate")]
+    public async Task<IActionResult> DeactivateEmailTemplate(Guid id)
+    {
+        var adminId = GetCurrentAdminId();
+
+        await _adminService.DeactivateEmailTemplateAsync(id, adminId);
+
+        return Ok(
+            Result.Success("ارسال ایمیل برای این رویداد با موفقیت غیرفعال شد."));
     }
 }

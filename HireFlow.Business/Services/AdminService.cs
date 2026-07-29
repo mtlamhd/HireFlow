@@ -1,6 +1,7 @@
 using HireFlow.Business.Authentications.Constants;
 using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.AdminDto;
+using HireFlow.Domain.Dtos.EmailDto;
 using HireFlow.Domain.Dtos.UserDto;
 using HireFlow.Domain.Entities;
 using HireFlow.Domain.Enums;
@@ -294,6 +295,70 @@ public class AdminService : IAdminService
                 EmailEventTypeEnum.EmployerDisapproved, 
                 placeholders);
         }
+    }
+     public async Task<List<EmailTemplateDto>> GetAllEmailTemplatesAsync()
+    {
+        return await _unitOfWork.EmailTemplates.GetAllTemplatesAsync();
+    }
+
+    public async Task<EmailTemplateDto> GetEmailTemplateByIdAsync(Guid id)
+    {
+        if (id == Guid.Empty)
+            throw new InvalidRequestException("شناسه قالب ایمیل نمی‌تواند خالی باشد.");
+
+        var dto = await _unitOfWork.EmailTemplates.GetTemplateByIdAsync(id);
+        
+        if (dto == null)
+            throw new ItemNotFoundException("EmailTemplate", id);
+
+        return dto;
+    }
+
+    public async Task UpdateEmailTemplateAsync(Guid id, UpdateEmailTemplateDto dto, Guid requesterId)
+    {
+        if (id == Guid.Empty)
+            throw new InvalidRequestException("شناسه قالب ایمیل نمی‌تواند خالی باشد.");
+
+    
+        var template = await _unitOfWork.EmailTemplates.GetTemplateEntityByIdAsync(id);
+        
+        if (template == null)
+            throw new ItemNotFoundException("EmailTemplate", id);
+
+     
+        template.UpdateTemplate(dto.Subject, dto.Body, requesterId);
+
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task ActivateEmailTemplateAsync(Guid id, Guid requesterId)
+    {
+        if (id == Guid.Empty)
+            throw new InvalidRequestException("شناسه قالب ایمیل نمی‌تواند خالی باشد.");
+
+        var template = await _unitOfWork.EmailTemplates.GetTemplateEntityByIdAsync(id);
+        
+        if (template == null)
+            throw new ItemNotFoundException("EmailTemplate", id);
+
+        template.Activate(requesterId);
+
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task DeactivateEmailTemplateAsync(Guid id, Guid requesterId)
+    {
+        if (id == Guid.Empty)
+            throw new InvalidRequestException("شناسه قالب ایمیل نمی‌تواند خالی باشد.");
+
+        var template = await _unitOfWork.EmailTemplates.GetTemplateEntityByIdAsync(id);
+        
+        if (template == null)
+            throw new ItemNotFoundException("EmailTemplate", id);
+
+        template.Deactivate(requesterId);
+
+        await _unitOfWork.SaveChangesAsync();
     }
 
     }
