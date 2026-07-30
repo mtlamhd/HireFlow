@@ -20,13 +20,15 @@ public class AdminService : IAdminService
     private readonly IAdminDashboardRepository _adminDashboardRepository;
     private readonly IEmailService _emailService;
 
-    public AdminService(UserManager<User> userManager, IUserRepository userRepository, IUnitOfWork unitOfWork, IAdminDashboardRepository adminDashboardRepository)
+    public AdminService(UserManager<User> userManager, IUserRepository userRepository, IUnitOfWork unitOfWork, IAdminDashboardRepository adminDashboardRepository, IEmailService emailService)
     {
         _userManager = userManager;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _adminDashboardRepository = adminDashboardRepository;
+        _emailService = emailService;
     }
+    //phase 4 appro employer
 
     public async Task ApproveEmployerAsync(Guid userId, Guid requesterId)
     {
@@ -69,6 +71,7 @@ public class AdminService : IAdminService
     {
         return await _userRepository.GetUnapprovedEmployersAsync();
     }
+    //phase 4 getall jobseeker
 
     public async Task<List<AdminJobSeekerSummaryDto>> GetAllJobSeekersAsync()
     {
@@ -76,6 +79,7 @@ public class AdminService : IAdminService
         return await _userRepository.GetAllJobSeekersAsync(RoleConstants.JobSeekerRoleName);
 
     }
+    //phase 4 detail jobseeker
 
     public async Task<AdminJobSeekerDetailsDto> GetJobSeekerDetailsAsync(Guid id)
     {
@@ -89,6 +93,7 @@ public class AdminService : IAdminService
 
         return detailsDto;
     }
+    //phase 4 active jobseeker
 
     public async Task ActivateJobSeekerAsync(Guid id, Guid requesterId)
     {
@@ -111,6 +116,7 @@ public class AdminService : IAdminService
             throw new IdentityOperationException("Activate JobSeeker", errorMessage);
         }
     }
+    //phase 4 deactive job-seeker
 
     public async Task DeactivateJobSeekerAsync(Guid id, Guid requesterId)
     {
@@ -132,10 +138,12 @@ public class AdminService : IAdminService
         }
 
     }
+    // phase 4 getall job-ad
     public async Task<List<AdminJobAdSummaryDto>> GetAllJobAdsForAdminAsync()
     {
         return await _unitOfWork.JobAds.GetAllJobAdsForAdminAsync();
     }
+    
     public async Task<AdminJobAdDetailsDto> GetJobAdDetailsForAdminAsync(Guid id)
     {
         if (id == Guid.Empty)
@@ -148,6 +156,7 @@ public class AdminService : IAdminService
 
         return detailsDto;
     }
+    //phase 4 active job-ad
     public async Task ActivateJobAdAsync(Guid id, Guid requesterId)
     {
         if (id == Guid.Empty)
@@ -163,6 +172,7 @@ public class AdminService : IAdminService
 
         await _unitOfWork.SaveChangesAsync();
     }
+    //deactive job-ad
     public async Task DeactivateJobAdAsync(Guid id, Guid requesterId)
     {
         if (id == Guid.Empty)
@@ -176,6 +186,7 @@ public class AdminService : IAdminService
 
         await _unitOfWork.SaveChangesAsync();
     }
+    //phase 4 soft delete job - ad 
     public async Task SoftDeleteJobAdAsync(Guid id, Guid requesterId)
     {
         if (id == Guid.Empty)
@@ -190,7 +201,7 @@ public class AdminService : IAdminService
 
         await _unitOfWork.SaveChangesAsync();
     }
-    
+    //phase 4 featured
     public async Task MakeJobAdFeaturedAsync(Guid id, DateTime expiresAt, Guid requesterId)
     {
         if (id == Guid.Empty)
@@ -208,6 +219,7 @@ public class AdminService : IAdminService
 
         await _unitOfWork.SaveChangesAsync();
     }
+    //phase 4 normal job-ad
     public async Task CancelJobAdFeaturedAsync(Guid id, Guid requesterId)
     {
         if (id == Guid.Empty)
@@ -221,6 +233,7 @@ public class AdminService : IAdminService
 
         await _unitOfWork.SaveChangesAsync();
     }
+    //phase 4 admin dashbord
     public async Task<AdminDashboardStatsDto> GetDashboardStatsAsync()
     {
        
@@ -236,11 +249,14 @@ public class AdminService : IAdminService
 
         return stats;
     }
+    
+    // phase 4 employer
     public async Task<List<AdminEmployerSummaryDto>> GetAllEmployersAsync()
     {
        
         return await _userRepository.GetAllEmployersForAdminAsync(RoleConstants.EmployerRoleName);
     }
+    // phase 4 employer
 
 
     public async Task<AdminEmployerDetailsDto> GetEmployerDetailsAsync(Guid userId)
@@ -256,6 +272,8 @@ public class AdminService : IAdminService
 
         return detailsDto;
     }
+    
+    //phase 4 disaprrove employer
 
 
     public async Task DisapproveEmployerAsync(Guid userId, Guid requesterId)
