@@ -1,0 +1,108 @@
+@using HireFlow.Domain.Entities
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@model HireFlow.Domain.Dtos.JobAdDto.PublicJobAdDetailsDto
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 4rem 0;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                
+                <!-- دکمه بازگشت -->
+                <div class="mb-4">
+                    <a asp-action="Index" class="text-decoration-none text-secondary fw-bold small px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.08);">
+                        ← بازگشت به لیست آگهی‌ها
+                    </a>
+                </div>
+
+                <!-- کارت اصلی جزئیات -->
+                <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5" style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
+                    
+                    <!-- هدر شغل -->
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-4 border-bottom border-secondary border-opacity-25">
+                        <div>
+                            <span class="badge rounded-pill px-3 py-1 mb-2 fw-bold" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">@Model.CategoryName</span>
+                            <h1 class="fw-bold text-white mb-2" style="letter-spacing: -1px;">@Model.Title</h1>
+                            <p class="text-secondary mb-0 fs-6">🏢 <strong class="text-white">@Model.CompanyName</strong> &nbsp;|&nbsp; 📍 @Model.CityName، @Model.ProvinceName</p>
+                        </div>
+                        <div>
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge rounded-pill px-4 py-2 fw-bold fs-6 shadow-sm" style="background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3);">🟢 در حال جذب نیرو</span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- باکس‌های اطلاعات کلیدی -->
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-4" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.04);">
+                                <span class="text-secondary small d-block mb-1">نوع همکاری</span>
+                                <strong class="text-white fs-6">@Model.EmploymentType</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-4" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.04);">
+                                <span class="text-secondary small d-block mb-1">حقوق و دستمزد</span>
+                                <strong class="fs-6" style="color: #34d399;">@(Model.Salary.HasValue ? Model.Salary.Value.ToString("N0") + " تومان" : "توافقی")</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-4" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.04);">
+                                <span class="text-secondary small d-block mb-1">تاریخ انتشار</span>
+                                <strong class="text-white fs-6">@Model.CreatedAt.ToShortDateString()</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- شرح موقعیت شغلی -->
+                    <h4 class="fw-bold text-white mb-3">شرح موقعیت شغلی</h4>
+                    <div class="text-secondary mb-5 fs-6" style="line-height: 2; white-space: pre-line; color: #94a3b8 !important;">
+                        @Model.Description
+                    </div>
+
+                    <!-- مهارت‌ها -->
+                    @if (Model.Skills != null && Model.Skills.Any())
+                    {
+                        <h4 class="fw-bold text-white mb-3">مهارت‌های تخصصی مورد نیاز</h4>
+                        <div class="d-flex flex-wrap gap-2 mb-5">
+                            @foreach (var skill in Model.Skills)
+                            {
+                                <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: rgba(99, 102, 241, 0.12); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.2);">⚡ @skill.Name</span>
+                            }
+                        </div>
+                    }
+
+                    <!-- باکس درخواست (هوشمند بر اساس وضعیت لاگین) -->
+                    <div class="rounded-4 p-4 text-center" style="background: radial-gradient(circle at 50% 0%, #312e81 0%, #0f172a 100%); border: 1px solid rgba(99, 102, 241, 0.3);">
+                        <h4 class="fw-bold text-white mb-2">آماده‌ی پیوستن به این تیم هستی؟</h4>
+                        <p class="text-secondary small mb-4">با یک کلیک رزومه‌ات را ارسال کن و مسیر شغلی‌ات را تغییر بده.</p>
+                        <div>
+                            @if (SignInManager.IsSignedIn(User))
+                            {
+                                <!-- کاربر لاگین کرده: دکمه ارسال درخواست -->
+                                <form asp-controller="JobSeeker" asp-action="Apply" method="post" class="d-inline">
+                                    <input type="hidden" name="jobAdId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold px-5 shadow-lg bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                                        ارسال درخواست همکاری 🚀
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <!-- کاربر لاگین نکرده: هدایت به صفحه لاگین -->
+                                <a asp-controller="Auth" asp-action="Login" class="btn btn-warning btn-lg rounded-pill fw-bold px-4 shadow-lg text-dark">
+                                    🔐 برای ارسال درخواست، ابتدا وارد سایت شوید
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

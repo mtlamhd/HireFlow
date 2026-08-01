@@ -1,6 +1,7 @@
 @model HireFlow.Mvc.Models.AuthView.RegisterEmployerViewModel
 @{
     ViewData["Title"] = "ثبت‌نام کارفرما";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
 }
 
 <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-5" style="background: linear-gradient(135deg, #2c3e50 0%, #fd746c 100%);">
@@ -30,7 +31,6 @@
                     <span asp-validation-for="CompanyName" class="text-danger small"></span>
                 </div>
 
-                <!-- فیلد پسورد به همراه دکمه چشم -->
                 <div class="input-group mb-4 shadow-sm rounded-3 overflow-hidden bg-light">
                     <div class="form-floating flex-grow-1">
                         <input asp-for="Password" type="password" class="form-control border-0 bg-light" id="passwordInput" placeholder="رمز عبور" />
@@ -59,7 +59,6 @@
     <script>
         const toggleBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('passwordInput');
-
         if (toggleBtn && passwordInput) {
             toggleBtn.addEventListener('click', function () {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';

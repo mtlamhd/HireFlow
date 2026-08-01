@@ -1,51 +1,108 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"] - HireFlow.Mvc</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/HireFlow.Mvc.styles.css" asp-append-version="true"/>
-</head>
-<body class="bg-light">
+﻿@using Microsoft.AspNetCore.Identity
+@using HireFlow.Domain.Entities
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
 
-<header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container-fluid">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">HireFlow.Mvc</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HireFlow</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif !important;
+            background-color: #0b0f19;
+            color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- هدر شیشه‌ای شناور (Navbar) -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(11, 15, 25, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4 d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
+                <span class="bg-gradient p-2 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); font-size: 16px;">⚡</span>
+                <span style="letter-spacing: -1px; background: linear-gradient(135deg, #fff 0%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">HireFlow</span>
+            </a>
+            
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-2">
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <a class="nav-link text-light px-3 rounded-pill hover-glass" asp-controller="Home" asp-action="Index">فرصت‌های شغلی</a>
                     </li>
                 </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var currentUser = await UserManager.GetUserAsync(User);
+                        var roles = await UserManager.GetRolesAsync(currentUser);
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light rounded-pill px-4 py-2 border-0 dropdown-toggle" style="background: rgba(255,255,255,0.05);" type="button" data-bs-toggle="dropdown">
+                                👤 حساب کاربری
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark shadow-lg rounded-4 border-0 mt-2 p-2" style="background: #1e293b;">
+                                @if (roles.Contains("Admin"))
+                                {
+                                    <li><a class="dropdown-item rounded-3 py-2" href="#">👑 پنل ادمین</a></li>
+                                }
+                                else if (roles.Contains("Employer"))
+                                {
+                                    <li><a class="dropdown-item rounded-3 py-2" href="#">🏢 پنل کارفرما</a></li>
+                                }
+                                else
+                                {
+                                    <li><a class="dropdown-item rounded-3 py-2" href="#">🎯 پنل کارجو</a></li>
+                                }
+                                <li><hr class="dropdown-divider opacity-25"></li>
+                                <li>
+                                    <form asp-controller="Auth" asp-action="Logout" method="post">
+                                        <button type="submit" class="dropdown-item text-danger rounded-3 py-2">خروج از سیستم</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Auth" asp-action="Login" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 fw-semibold" style="background: rgba(255,255,255,0.05);">ورود</a>
+                        <a asp-controller="Auth" asp-action="RegisterJobSeeker" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">ثبت‌نام رایگان</a>
+                    }
+                </div>
             </div>
         </div>
     </nav>
-</header>
-<div class="container">
-    <main role="main" class="pb-3">
+
+    <!-- محتوای اصلی صفحات -->
+    <main class="flex-shrink-0" style="margin-top: 76px;">
         @RenderBody()
     </main>
-</div>
 
-<footer class="border-top footer text-muted">
-    <div class="container">
-        &copy; 2026 - HireFlow.Mvc - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-    </div>
-</footer>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
-@await RenderSectionAsync("Scripts", required: false)
+    <!-- فوتر مدرن -->
+    <footer class="mt-auto py-4 text-center text-secondary small border-top border-secondary border-opacity-15" style="background: #0b0f19;">
+        <div class="container">
+            <p class="mb-0">تمامی حقوق برای پلتفرم کاریابی <span class="text-white fw-bold">HireFlow</span> محفوظ است © ۱۴۰۳</p>
+        </div>
+    </footer>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<style>
+    .hover-glass:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+</style>
