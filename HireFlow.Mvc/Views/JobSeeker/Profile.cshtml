@@ -1,0 +1,168 @@
+@model HireFlow.Mvc.Models.JobSeekerView.JobSeekerProfileViewModel
+@{
+    ViewData["Title"] = "پنل کارجو";
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container">
+        
+        <!-- هدر پنل -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">🎯 پنل اختصاصی کارجو</span>
+                <h1 class="fw-bold text-white mb-0">مدیریت پروفایل و مدارک</h1>
+            </div>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">← بازگشت به سایت</a>
+        </div>
+
+        <!-- پیام‌ها -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
+                ✨ @TempData["Message"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            
+            <!-- ستون راست: عکس پروفایل و رزومه (مدارک) -->
+            <div class="col-lg-4">
+                
+                <!-- کارت عکس پروفایل -->
+                <div class="card border-0 shadow-lg rounded-4 p-4 mb-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div class="position-relative d-inline-block mx-auto mb-3">
+                        @if (Model.ProfileImageId.HasValue && Model.ProfileImageId.Value != Guid.Empty)
+                        {
+                            <!-- اگر کاربر عکس داشت، آن را نمایش بده -->
+                            <img src="@Url.Action("GetAttachment", "JobSeeker", new { id = Model.ProfileImageId })" class="rounded-circle shadow-lg mx-auto" style="width: 100px; height: 100px; object-fit: cover;" alt="Profile Image" />
+                        }
+                        else
+                        {
+                            <!-- اگر عکس نداشت، حرف اول اسم یا آیکون را نشان بده -->
+                            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-lg mx-auto" style="width: 100px; height: 100px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); font-size: 36px;">
+                                @(string.IsNullOrEmpty(Model.FirstName) ? "👤" : Model.FirstName.Substring(0, 1))
+                            </div>
+                        }
+                    </div>
+                    <h5 class="fw-bold text-white mb-1">@(string.IsNullOrEmpty(Model.FirstName) ? "کاربر عزیز" : $"{Model.FirstName} {Model.LastName}")</h5>
+                    <p class="text-secondary small mb-4">@Model.PhoneNumber</p>
+
+                    <form asp-action="UploadProfileImage"
+                          method="post"
+                          enctype="multipart/form-data"
+                          class="mb-2">
+
+                        <input type="file"
+                               name="imageFile"
+                               accept="image/*"
+                               class="form-control form-control-sm bg-dark text-white border-secondary mb-2 rounded-3"
+                               required />
+
+                        <button type="submit"
+                                class="btn btn-outline-light btn-sm w-100 rounded-3">
+                            تغییر تصویر پروفایل
+                        </button>
+                    </form>
+
+                    @if (Model.ProfileImageId.HasValue && Model.ProfileImageId.Value != Guid.Empty)
+                    {
+                        <form asp-action="RemoveProfileImage"
+                              method="post"
+                              class="mt-2">
+
+                            <button type="submit"
+                                    class="btn btn-outline-danger btn-sm w-100 rounded-3">
+                                حذف تصویر پروفایل
+                            </button>
+                        </form>
+                    }
+                </div>
+
+                <!-- کارت رزومه -->
+                <div class="card border-0 shadow-lg rounded-4 p-4" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h5 class="fw-bold text-white mb-3">📄 رزومه شغلی (PDF)</h5>
+                    
+                    @if (Model.ResumeId.HasValue && Model.ResumeId.Value != Guid.Empty)
+                    {
+                        <div class="p-3 rounded-3 mb-3 small d-flex align-items-center justify-content-between" style="background: rgba(52, 211, 153, 0.1); color: #34d399;">
+                            <span>✅ رزومه شما ثبت شده است</span>
+                        </div>
+                        <form asp-action="RemoveResume" method="post">
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-3">حذف و آپلود رزومه جدید</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert p-3 rounded-3 small mb-3 bg-danger bg-opacity-10 text-danger border-0">
+                            ⚠️ هنوز رزومه‌ای آپلود نکرده‌اید! (برای ارسال درخواست اجباری است).
+                        </div>
+                        <form asp-action="UploadResume" method="post" enctype="multipart/form-data">
+                            <input type="file" name="resumeFile" accept=".pdf" class="form-control form-control-sm bg-dark text-white border-secondary mb-2 rounded-3" required />
+                            <button type="submit" class="btn btn-primary btn-sm w-100 rounded-3 fw-bold bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">آپلود فایل PDF رزومه</button>
+                        </form>
+                    }
+                </div>
+
+            </div>
+
+            <!-- ستون چپ: فرم ویرایش مشخصات -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h4 class="fw-bold text-white mb-4">جزئیات حساب کاربری و اطلاعات فردی</h4>
+
+                    <form asp-action="Profile" method="post">
+                        <div asp-validation-summary="All" class="text-danger small mb-3 p-2 bg-danger bg-opacity-10 rounded-3"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">نام</label>
+                                <input asp-for="FirstName" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none" placeholder="نام خود را وارد کنید..." />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">نام خانوادگی</label>
+                                <input asp-for="LastName" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none" placeholder="نام خانوادگی..." />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">شماره موبایل (غیرقابل تغییر)</label>
+                                <input asp-for="PhoneNumber" class="form-control bg-dark text-secondary border-0 py-2.5 rounded-3 shadow-none" disabled />
+                                <input type="hidden" asp-for="PhoneNumber" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">ایمیل</label>
+                                <input asp-for="Email" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none" placeholder="example@email.com" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">کد ملی (۱۰ رقم)</label>
+                                <input asp-for="NationalId" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none" placeholder="0012345678" maxlength="10" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">تاریخ تولد</label>
+                                <input asp-for="BirthDate" type="date" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none" />
+                            </div>
+                        </div>
+
+                        <div class="mt-5 pt-3 border-top border-secondary border-opacity-25 text-end">
+                            <button type="submit" class="btn btn-primary px-5 rounded-3 fw-bold py-3 shadow-lg bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                                ذخیره و به‌روزرسانی پروفایل ✨
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

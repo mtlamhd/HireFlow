@@ -85,8 +85,11 @@ public class AuthController : Controller
         try
         {
             var dto = new RegisterJobSeekerDto { Username = model.Username, Password = model.Password };
+            
+           
             var result = await _authService.RegisterJobSeekerAsync(dto);
 
+           
             var user = await _userManager.FindByIdAsync(result.Id.ToString());
             if (user != null)
             {
@@ -97,17 +100,18 @@ public class AuthController : Controller
         }
         catch (ConflictException)
         {
-            ModelState.AddModelError("", "کاربری با این شماره موبایل قبلاً در سیستم ثبت‌نام کرده است.");
+            ModelState.AddModelError("", "این شماره موبایل قبلاً در سیستم ثبت‌نام کرده است.");
             return View(model);
         }
         catch (UserRegistrationException)
         {
-            ModelState.AddModelError("", "خطا در ثبت‌نام. لطفاً از رمز عبور معتبر (حداقل ۶ کاراکتر) استفاده کنید.");
+           
+            ModelState.AddModelError("", "خطا در ثبت‌نام: رمز عبور باید حداقل ۶ کاراکتر و شامل حروف و اعداد باشد.");
             return View(model);
         }
         catch (BaseAppException ex)
         {
-            ModelState.AddModelError("", ex.Message); 
+            ModelState.AddModelError("", ex.Message);
             return View(model);
         }
     }
@@ -137,12 +141,12 @@ public class AuthController : Controller
         }
         catch (ConflictException)
         {
-            ModelState.AddModelError("", "کاربری با این شماره موبایل قبلاً در سیستم ثبت‌نام کرده است.");
+            ModelState.AddModelError("", "این شماره موبایل قبلاً در سیستم ثبت‌نام کرده است.");
             return View(model);
         }
         catch (UserRegistrationException)
         {
-            ModelState.AddModelError("", "خطا در ثبت‌نام. لطفاً از رمز عبور معتبر (حداقل ۶ کاراکتر) استفاده کنید.");
+            ModelState.AddModelError("", "خطا در ثبت‌نام: رمز عبور باید حداقل ۶ کاراکتر و شامل حروف و اعداد باشد.");
             return View(model);
         }
         catch (BaseAppException ex)
