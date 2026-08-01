@@ -1,0 +1,65 @@
+@model HireFlow.Mvc.Models.AuthView.RegisterJobSeekerViewModel
+@{
+    ViewData["Title"] = "ثبت‌نام کارجو";
+}
+
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-5" style="background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);">
+    <div class="col-md-5 col-lg-4">
+        <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white bg-opacity-95">
+            
+            <div class="text-center mb-4">
+                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 65px; height: 65px; font-size: 28px;">
+                    🎯
+                </div>
+                <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -1px;">HireFlow</h2>
+                <p class="text-success fw-semibold small">عضویت به عنوان کارجو</p>
+            </div>
+
+            <form asp-action="RegisterJobSeeker" method="post">
+                <div asp-validation-summary="All" class="text-danger small mb-3 p-2 bg-danger bg-opacity-10 rounded-3 border border-danger border-opacity-25"></div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Username" class="form-control rounded-3 border-0 bg-light shadow-sm" placeholder="0912..." />
+                    <label asp-for="Username" class="text-muted">شماره موبایل</label>
+                    <span asp-validation-for="Username" class="text-danger small"></span>
+                </div>
+
+                <!-- فیلد پسورد به همراه دکمه چشم -->
+                <div class="input-group mb-4 shadow-sm rounded-3 overflow-hidden bg-light">
+                    <div class="form-floating flex-grow-1">
+                        <input asp-for="Password" type="password" class="form-control border-0 bg-light" id="passwordInput" placeholder="رمز عبور" />
+                        <label asp-for="Password" class="text-muted">رمز عبور</label>
+                    </div>
+                    <button class="btn btn-light border-0 px-3 text-secondary" type="button" id="togglePasswordBtn" title="نمایش/مخفی کردن رمز">
+                        👁️
+                    </button>
+                </div>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+
+                <button type="submit" class="btn btn-success btn-lg w-100 rounded-3 fw-bold shadow py-2 bg-gradient">ثبت‌نام نهایی</button>
+            </form>
+
+            <hr class="text-muted my-4 opacity-25">
+
+            <div class="text-center">
+                <a asp-action="Login" class="text-decoration-none text-muted small fw-bold">قبلاً ثبت‌نام کرده‌اید؟ <span class="text-success">ورود</span></a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const passwordInput = document.getElementById('passwordInput');
+
+        if (toggleBtn && passwordInput) {
+            toggleBtn.addEventListener('click', function () {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.textContent = type === 'password' ? '👁️' : '🙈';
+            });
+        }
+    </script>
+}
