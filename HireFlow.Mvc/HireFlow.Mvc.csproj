@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\HireFlow.Business\HireFlow.Business.csproj" />
+      <ProjectReference Include="..\HireFlow.Domain\HireFlow.Domain.csproj" />
+      <ProjectReference Include="..\HireFlow.Infrustructure\HireFlow.Infrustructure.csproj" />
+    </ItemGroup>
+
+</Project>
