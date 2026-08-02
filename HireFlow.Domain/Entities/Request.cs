@@ -66,6 +66,16 @@ public class Request : BaseEntity, IValidatableEntity
         SetModificationInfo(requesterId);
 
     }
+    public void Reapply(Guid requesterId)
+    {
+        if (Status != RequestStatusEnum.Cancelled)
+            throw new BusinessRuleException(
+                "Only cancelled requests can be reapplied.",
+                4008);
+
+        Status = RequestStatusEnum.Initial;
+        SetModificationInfo(requesterId);
+    }
 
 
     public void Reject(Guid requesterId)

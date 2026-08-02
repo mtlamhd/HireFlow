@@ -43,15 +43,7 @@ public class AuthController : Controller
             return View(model);
         }
 
-      
-        var roles = await _userManager.GetRolesAsync(user);
-        if (roles.Contains(RoleConstants.EmployerRoleName) && !user.IsApproved)
-        {
-            ModelState.AddModelError("", "حساب کاربری کارفرمایی شما هنوز توسط ادمین تایید نشده است.");
-            return View(model);
-        }
-
-      
+       
         var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, isPersistent: false, lockoutOnFailure: true);
 
         if (!result.Succeeded)
@@ -60,12 +52,14 @@ public class AuthController : Controller
             return View(model);
         }
 
-       
+        var roles = await _userManager.GetRolesAsync(user);
+
+        // هدایت بر اساس نقش
         if (roles.Contains(RoleConstants.AdminRoleName))
             return RedirectToAction("Index", "Admin");
         
         if (roles.Contains(RoleConstants.EmployerRoleName))
-            return RedirectToAction("Index", "Employer");
+            return RedirectToAction("Profile", "Employer"); 
 
         return RedirectToAction("Index", "Home");
     }

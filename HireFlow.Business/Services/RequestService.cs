@@ -162,58 +162,64 @@ public class RequestService : IRequestService
         
         public async Task ApplyForJobAdAsync(Guid userId, ApplyJobAdDto dto)
         {
-          
             if (userId == Guid.Empty)
                 throw new InvalidRequestException("User ID cannot be empty.");
 
             if (dto == null || dto.JobAdId == Guid.Empty)
                 throw new InvalidRequestException("Invalid Job Ad ID.");
 
-          
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
                 throw new ItemNotFoundException("User", userId);
 
-           
             if (!user.ResumeId.HasValue || user.ResumeId.Value == Guid.Empty)
             {
                 throw new InvalidRequestException("You must upload your resume before applying to any job.");
             }
 
-           
             var jobAd = await _unitOfWork.JobAds.GetByIdAsync(dto.JobAdId);
             if (jobAd == null)
                 throw new ItemNotFoundException("JobAd", dto.JobAdId);
 
-            
             if (!jobAd.IsActive || jobAd.IsExpired())
             {
                 throw new InvalidRequestException("This job advertisement is either inactive or has expired.");
             }
 
            
-            var alreadyApplied = await _unitOfWork.Requests.HasAlreadyAppliedAsync(userId, dto.JobAdId);
-            if (alreadyApplied)
+            var existingRequest = await _unitOfWork.Requests.GetFirstOrDefaultAsync(
+                r => r.UserId == userId && r.JobAdId == dto.JobAdId, 
+                tracking: true);
+
+            if (existingRequest != null)
             {
-                throw new ConflictException("You have already submitted an application for this job.");
+               
+                if (existingRequest.Status == RequestStatusEnum.Cancelled)
+                {
+                    existingRequest.Reapply(userId);
+                    await _unitOfWork.SaveChangesAsync();
+                    return;
+                }
+
+                
+                throw new ConflictException("شما قبلاً برای این فرصت شغلی درخواست ارسال کرده‌اید.");
             }
             
             var request = new Request(dto.JobAdId, userId);
             
             await _unitOfWork.Requests.AddAsync(request);
             await _unitOfWork.SaveChangesAsync();
+            
             var company = await _unitOfWork.Companies.GetFirstOrDefaultAsync(c => c.Id == jobAd.CompanyId);
             if (company != null)
             {
                 var employer = await _userManager.FindByIdAsync(company.OwnerId.ToString());
                 if (employer != null && !string.IsNullOrWhiteSpace(employer.Email))
                 {
-                  
                     var jobSeekerName = (string.IsNullOrWhiteSpace(user.FirstName) && string.IsNullOrWhiteSpace(user.LastName))
                         ? user.UserName!
                         : $"{user.FirstName} {user.LastName}".Trim();
 
-                   
                     var placeholders = new Dictionary<string, string>
                     {
                         { "{CompanyName}", company.Name },
@@ -221,7 +227,6 @@ public class RequestService : IRequestService
                         { "{JobTitle}", jobAd.Title }
                     };
 
-                    
                     await _emailService.SendEmailFromTemplateAsync(
                         employer.Email, 
                         EmailEventTypeEnum.NewApplicationReceived, 

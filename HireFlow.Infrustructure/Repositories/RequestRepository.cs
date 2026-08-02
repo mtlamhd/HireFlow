@@ -1,5 +1,6 @@
 using Azure.Core;
 using HireFlow.Domain.Dtos.RequestDto;
+using HireFlow.Domain.Enums;
 using HireFlow.Domain.Interfaces.Repo;
 using HireFlow.Infrustructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -98,7 +99,10 @@ public class RequestRepository : GenericRepository<Request>, IRequestRepository
     }
     public async Task<bool> HasAlreadyAppliedAsync(Guid userId, Guid jobAdId)
     {
-        return await _dbSet.AnyAsync(r => r.UserId == userId && r.JobAdId == jobAdId);
+        return await _dbSet.AnyAsync(r => 
+            r.UserId == userId && 
+            r.JobAdId == jobAdId && 
+            r.Status != RequestStatusEnum.Cancelled);
     }
     
 }
