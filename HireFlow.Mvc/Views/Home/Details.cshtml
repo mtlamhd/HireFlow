@@ -78,6 +78,20 @@
 
                     <!-- باکس درخواست (هوشمند بر اساس وضعیت لاگین) -->
                     <div class="rounded-4 p-4 text-center" style="background: radial-gradient(circle at 50% 0%, #312e81 0%, #0f172a 100%); border: 1px solid rgba(99, 102, 241, 0.3);">
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert rounded-4 p-3 mb-4 text-center fw-bold shadow-sm border-0" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">
+                                @TempData["Error"]
+                            </div>
+                        }
+                        @if (TempData["Message"] != null)
+                        {
+                            <div class="alert rounded-4 p-3 mb-4 text-center fw-bold shadow-sm border-0" style="background: rgba(52, 211, 153, 0.2); color: #34d399;">
+                                ✨ @TempData["Message"]
+                            </div>
+                        }
+
+
                         <h4 class="fw-bold text-white mb-2">آماده‌ی پیوستن به این تیم هستی؟</h4>
                         <p class="text-secondary small mb-4">با یک کلیک رزومه‌ات را ارسال کن و مسیر شغلی‌ات را تغییر بده.</p>
                         <div>
@@ -85,7 +99,7 @@
                             {
                                 <!-- کاربر لاگین کرده: دکمه ارسال درخواست -->
                                 <form asp-controller="JobSeeker" asp-action="Apply" method="post" class="d-inline">
-                                    <input type="hidden" name="jobAdId" value="@Model.Id" />
+                                    <input type="hidden" name="jobAdId" value="@Model.Id"/>
                                     <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold px-5 shadow-lg bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
                                         ارسال درخواست همکاری 🚀
                                     </button>

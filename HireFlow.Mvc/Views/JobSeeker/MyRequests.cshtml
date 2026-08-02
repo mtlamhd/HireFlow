@@ -1,0 +1,127 @@
+@using HireFlow.Domain.Enums
+@model List<HireFlow.Domain.Dtos.RequestDto.JobSeekerRequestSummaryDto>
+@{
+    ViewData["Title"] = "درخواست‌های من";
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0; position: relative; overflow: hidden;">
+
+    <!-- نورهای نئونی پس‌زمینه -->
+    <div style="position: absolute; top: -50px; right: 15%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, rgba(0,0,0,0) 70%); filter: blur(60px); z-index: 0; pointer-events: none;"></div>
+
+    <div class="container" style="position: relative; z-index: 1;">
+        
+        <!-- هدر صفحه -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">📋 پیگیری وضعیت شغلی</span>
+                <h1 class="fw-bold text-white mb-0">درخواست‌های همکاری من</h1>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="Profile" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">⚙️ ویرایش پروفایل</a>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary rounded-pill px-4 py-2 shadow bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">🔍 جستجوی شغل جدید</a>
+            </div>
+        </div>
+
+        <!-- پیام‌ها -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
+                ✨ @TempData["Message"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- لیست درخواست‌ها -->
+        @if (Model == null || !Model.Any())
+        {
+            <div class="text-center py-5">
+                <div class="card border-0 shadow-lg rounded-4 p-5 mx-auto" style="background: #1e293b; max-width: 500px; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div class="display-3 mb-3">📭</div>
+                    <h3 class="fw-bold text-white mb-2">هنوز درخواستی ثبت نکرده‌اید!</h3>
+                    <p class="text-secondary small mb-4">از میان فرصت‌های شغلی موجود، شغل مورد علاقه‌تان را پیدا کنید و رزومه‌تان را بفرستید.</p>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary rounded-pill fw-bold py-2 shadow bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">مشاهده آگهی‌ها 🚀</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var req in Model)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-lg rounded-4 h-100 p-4 position-relative transition-card neon-hover d-flex flex-column" style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.06) !important;">
+                            
+                            <!-- هدر کارت: شرکت و وضعیت -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fw-semibold small" style="color: #818cf8;">🏢 @req.CompanyName</span>
+                                
+                                <!-- بج وضعیت با رنگ‌های مخصوص -->
+                                @switch (req.Status)
+                                {
+                                    case RequestStatusEnum.Initial:
+                                        <span class="badge rounded-pill px-3 py-1" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">⏳ در انتظار بررسی</span>
+                                        break;
+                                    case RequestStatusEnum.UnderReview:
+                                        <span class="badge rounded-pill px-3 py-1" style="background: rgba(250, 204, 21, 0.15); color: #facc15;">👁️ در حال بررسی کارفرما</span>
+                                        break;
+                                    case RequestStatusEnum.Interview:
+                                        <span class="badge rounded-pill px-3 py-1" style="background: rgba(129, 140, 248, 0.15); color: #818cf8;">🤝 دعوت به مصاحبه</span>
+                                        break;
+                                    case RequestStatusEnum.Accepted:
+                                        <span class="badge rounded-pill px-3 py-1" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">🎉 پذیرفته شده</span>
+                                        break;
+                                    case RequestStatusEnum.Rejected:
+                                        <span class="badge rounded-pill px-3 py-1" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">❌ رد شده</span>
+                                        break;
+                                    case RequestStatusEnum.Cancelled:
+                                        <span class="badge rounded-pill px-3 py-1" style="background: rgba(100, 116, 139, 0.15); color: #94a3b8;">🚫 لغو شده</span>
+                                        break;
+                                }
+                            </div>
+
+                            <!-- عنوان شغل -->
+                            <h4 class="fw-bold text-white mb-2 text-truncate" title="@req.JobAdTitle">@req.JobAdTitle</h4>
+                            <p class="text-secondary small font-monospace mb-4">تاریخ ارسال: @req.CreatedAt.ToShortDateString()</p>
+
+                            <!-- دکمه‌های پایین کارت -->
+                            <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 d-flex gap-2">
+                                <a asp-controller="Home" asp-action="Details" asp-route-id="@req.JobAdId" class="btn btn-outline-light flex-grow-1 rounded-3 fw-bold py-2 shadow-sm" style="border-color: rgba(255,255,255,0.12); font-size: 13px;">مشاهده آگهی</a>
+                                
+                                <!-- لغو درخواست (فقط در وضعیت Initial مجاز است) -->
+                                @if (req.Status == RequestStatusEnum.Initial)
+                                {
+                                    <form asp-action="CancelRequest" asp-route-id="@req.Id" method="post" class="d-inline" onsubmit="return confirm('آیا از لغو این درخواست اطمینان دارید؟');">
+                                        <button type="submit" class="btn btn-outline-danger rounded-3 py-2 px-3 fw-bold shadow-sm" style="font-size: 13px;" title="لغو درخواست">
+                                            لغو
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .transition-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .neon-hover:hover {
+        transform: translateY(-5px);
+        background: #1e293b !important;
+        border-color: #6366f1 !important;
+        box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.3) !important;
+    }
+</style>

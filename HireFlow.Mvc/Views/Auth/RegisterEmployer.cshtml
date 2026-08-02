@@ -4,56 +4,84 @@
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
 }
 
-<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-5" style="background: linear-gradient(135deg, #2c3e50 0%, #fd746c 100%);">
-    <div class="col-md-5 col-lg-4">
-        <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white bg-opacity-95">
-            
-            <div class="text-center mb-4">
-                <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 65px; height: 65px; font-size: 28px;">
-                    🏢
-                </div>
-                <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -1px;">HireFlow</h2>
-                <p class="text-danger fw-semibold small">عضویت به عنوان کارفرما</p>
-            </div>
-
-            <form asp-action="RegisterEmployer" method="post">
-                <div asp-validation-summary="All" class="text-danger small mb-3 p-2 bg-danger bg-opacity-10 rounded-3 border border-danger border-opacity-25"></div>
-
-                <div class="form-floating mb-3">
-                    <input asp-for="Username" class="form-control rounded-3 border-0 bg-light shadow-sm" placeholder="0912..." />
-                    <label asp-for="Username" class="text-muted">شماره موبایل</label>
-                    <span asp-validation-for="Username" class="text-danger small"></span>
+<div class="container-fluid min-vh-100 p-0 m-0" style="background-color: #0b0f19; overflow-x: hidden;">
+    <div class="row g-0 min-vh-100">
+        
+        <!-- فرم ثبت‌نام -->
+        <div class="col-lg-5 col-md-6 d-flex align-items-center justify-content-center p-4 p-md-5" style="background: #0f172a; border-left: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 2;">
+            <div class="w-100" style="max-width: 400px;">
+                
+                <div class="mb-4">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none d-inline-flex align-items-center gap-2 mb-3">
+                        <span class="p-2 rounded-3 text-white shadow" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);">🏢</span>
+                        <span class="fw-bold fs-4 text-white">HireFlow</span>
+                    </a>
+                    <h3 class="fw-bold text-white mb-1">عضویت کارفرما 🌟</h3>
+                    <p class="text-secondary small">شرکت خود را ثبت کنید و بهترین متخصصان را جذب کنید.</p>
                 </div>
 
-                <div class="form-floating mb-3">
-                    <input asp-for="CompanyName" class="form-control rounded-3 border-0 bg-light shadow-sm" placeholder="نام شرکت" />
-                    <label asp-for="CompanyName" class="text-muted">نام شرکت</label>
-                    <span asp-validation-for="CompanyName" class="text-danger small"></span>
-                </div>
+                <form asp-action="RegisterEmployer" method="post">
+                    <div asp-validation-summary="All" class="text-danger small mb-3 p-3 rounded-3 border-0" style="background: rgba(239, 68, 68, 0.1); color: #f87171;"></div>
 
-                <div class="input-group mb-4 shadow-sm rounded-3 overflow-hidden bg-light">
-                    <div class="form-floating flex-grow-1">
-                        <input asp-for="Password" type="password" class="form-control border-0 bg-light" id="passwordInput" placeholder="رمز عبور" />
-                        <label asp-for="Password" class="text-muted">رمز عبور</label>
+                    <div class="mb-3">
+                        <label class="form-label small text-secondary fw-bold">شماره موبایل</label>
+                        <input asp-for="Username" class="form-control text-white border-0 py-3 px-3 rounded-3 shadow-none neon-input" placeholder="09123456789" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.08) !important;" />
+                        <span asp-validation-for="Username" class="text-danger small mt-1 d-block"></span>
                     </div>
-                    <button class="btn btn-light border-0 px-3 text-secondary" type="button" id="togglePasswordBtn" title="نمایش/مخفی کردن رمز">
-                        👁️
+
+                    <div class="mb-3">
+                        <label class="form-label small text-secondary fw-bold">نام شرکت</label>
+                        <input asp-for="CompanyName" class="form-control text-white border-0 py-3 px-3 rounded-3 shadow-none neon-input" placeholder="مثلا فناوری اطلاعات پایا..." style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.08) !important;" />
+                        <span asp-validation-for="CompanyName" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small text-secondary fw-bold">رمز عبور (حداقل ۶ کاراکتر)</label>
+                        <div class="input-group rounded-3 overflow-hidden" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.08);">
+                            <input asp-for="Password" type="password" class="form-control border-0 text-white py-3 px-3 shadow-none bg-transparent" id="passwordInput" placeholder="••••••••" />
+                            <button class="btn btn-transparent border-0 px-3 text-secondary" type="button" id="togglePasswordBtn" title="نمایش/مخفی کردن رمز">
+                                👁️
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-danger btn-lg w-100 rounded-3 fw-bold py-3 shadow-lg bg-gradient border-0" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); font-size: 15px;">
+                        ثبت‌نام و ساخت شرکت ⚡
                     </button>
+                </form>
+
+                <hr class="text-secondary my-4 opacity-25">
+
+                <div class="text-center">
+                    <p class="text-secondary small mb-2">قبلاً ثبت‌نام کرده‌اید؟</p>
+                    <a asp-action="Login" class="text-decoration-none fw-bold" style="color: #fb923c;">وارد شوید</a>
                 </div>
-                <span asp-validation-for="Password" class="text-danger small"></span>
 
-                <button type="submit" class="btn btn-danger btn-lg w-100 rounded-3 fw-bold shadow py-2 bg-gradient">ثبت‌نام و ساخت شرکت</button>
-            </form>
-
-            <hr class="text-muted my-4 opacity-25">
-
-            <div class="text-center">
-                <a asp-action="Login" class="text-decoration-none text-muted small fw-bold">قبلاً ثبت‌نام کرده‌اید؟ <span class="text-danger">ورود</span></a>
             </div>
-
         </div>
+
+        <!-- ویترین چپ -->
+        <div class="col-lg-7 col-md-6 d-none d-md-flex align-items-center justify-content-center p-5 position-relative overflow-hidden" style="background: radial-gradient(circle at 50% 50%, #7c2d12 0%, #0b0f19 80%);">
+            <div style="position: absolute; bottom: 15%; right: 15%; width: 350px; height: 350px; background: radial-gradient(circle, rgba(249,115,22,0.2) 0%, rgba(0,0,0,0) 70%); filter: blur(70px); pointer-events: none;"></div>
+            
+            <div class="text-center position-relative z-1 px-lg-5" style="max-width: 550px;">
+                <h1 class="display-4 fw-bold text-white mb-3" style="letter-spacing: -2px;">بهترین نیروهای متخصص منتظر شما هستند</h1>
+                <p class="text-secondary lead fs-6">آگهی‌های استخدام خود را منتشر کنید، رزومه‌های حرفه‌ای دریافت کنید و فرآیند مصاحبه تا استخدام را به شکلی مدرن مدیریت کنید.</p>
+            </div>
+        </div>
+
     </div>
 </div>
+
+<style>
+    .neon-input:focus {
+        background: rgba(15, 23, 42, 0.95) !important;
+        border-color: #f97316 !important;
+        box-shadow: 0 0 15px rgba(249, 115, 22, 0.25) !important;
+        color: #fff !important;
+    }
+</style>
 
 @section Scripts {
     <script>
