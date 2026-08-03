@@ -1,0 +1,160 @@
+@using HireFlow.Domain.Entities
+@model HireFlow.Mvc.Models.EmployerView.CreateJobAdViewModel
+@{
+    ViewData["Title"] = "ثبت آگهی استخدام جدید";
+    var cities = ViewBag.Cities as List<City> ?? new List<City>();
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    var skills = ViewBag.Skills as List<Skill> ?? new List<Skill>();
+    var employmentTypes = ViewBag.EmploymentTypes as IEnumerable<dynamic> ?? new List<dynamic>();
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container">
+        
+        <!-- هدر -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(249, 115, 22, 0.15); color: #fb923c;">💼 ثبت فرصت شغلی</span>
+                <h1 class="fw-bold text-white mb-0">انتشار آگهی استخدام جدید</h1>
+            </div>
+            <a asp-action="JobAds" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">← بازگشت به لیست آگهی‌ها</a>
+        </div>
+
+        <div class="row g-4">
+            
+            <!-- ستون ناوبری سایدبار -->
+            <div class="col-lg-3">
+                <div class="card border-0 shadow-lg rounded-4 p-3" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div class="list-group list-group-flush gap-2 border-0">
+                        <a asp-controller="Employer" asp-action="Profile" class="list-group-item list-group-item-action rounded-3 border-0 py-3 px-4 d-flex align-items-center justify-content-between text-white transition-nav hover-glass" style="background: rgba(255,255,255,0.02);">
+                            <span>👤 مشخصات فردی کارفرما</span>
+                            <span class="text-secondary">←</span>
+                        </a>
+                        <a asp-controller="Employer" asp-action="Company" class="list-group-item list-group-item-action rounded-3 border-0 py-3 px-4 d-flex align-items-center justify-content-between text-white transition-nav hover-glass" style="background: rgba(255,255,255,0.02);">
+                            <span>🏢 اطلاعات رسمی شرکت</span>
+                            <span class="text-secondary">←</span>
+                        </a>
+                        <a asp-controller="Employer" asp-action="JobAds" class="list-group-item list-group-item-action rounded-3 border-0 py-3 px-4 d-flex align-items-center justify-content-between transition-nav" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white !important;">
+                            <span>💼 آگهی‌های استخدامی من</span>
+                            <span>←</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ستون فرم ثبت آگهی -->
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h4 class="fw-bold text-white mb-4">مشخصات موقعیت شغلی</h4>
+
+                    <form asp-action="CreateJobAd" method="post" novalidate="novalidate">
+                        
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-4 p-3 bg-danger bg-opacity-10 rounded-4 border-0"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label small text-secondary fw-bold">عنوان آگهی شغلی <span class="text-danger">*</span></label>
+                                <input asp-for="Title" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" placeholder="مثال: کارشناس ارشد توسعه وب ASP.NET" />
+                                <span asp-validation-for="Title" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">دسته‌بندی شغلی <span class="text-danger">*</span></label>
+                                <select asp-for="CategoryId" class="form-select bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input">
+                                    <option value="">انتخاب دسته‌بندی...</option>
+                                    @foreach (var cat in categories)
+                                    {
+                                        <option value="@cat.Id">@cat.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">شهر محل کار <span class="text-danger">*</span></label>
+                                <select asp-for="CityId" class="form-select bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input">
+                                    <option value="">انتخاب شهر...</option>
+                                    @foreach (var city in cities)
+                                    {
+                                        <option value="@city.Id">@city.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CityId" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">نوع همکاری <span class="text-danger">*</span></label>
+                                <select asp-for="EmploymentType" class="form-select bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input">
+                                    <option value="">انتخاب نوع همکاری...</option>
+                                    @foreach (var type in employmentTypes)
+                                    {
+                                        <option value="@type.Value">@type.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="EmploymentType" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">حقوق و دستمزد ماهیانه (تومان - اختیاری)</label>
+                                <input asp-for="Salary" type="number" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" placeholder="خالی گذاشتن به معنی توافقی است" />
+                                <span asp-validation-for="Salary" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <!-- بخش انتخاب مهارت‌های آگهی -->
+                            <div class="col-md-12 my-3">
+                                <label class="form-label small text-secondary fw-bold mb-2">⚡ مهارت‌های تخصصی مورد نیاز (اختیاری)</label>
+                                <div class="row g-2 p-3 rounded-4 bg-dark bg-opacity-50" style="border: 1px solid rgba(255,255,255,0.04); max-height: 180px; overflow-y: auto;">
+                                    @foreach (var skill in skills)
+                                    {
+                                        bool isSelected = Model.SkillIds != null && Model.SkillIds.Contains(skill.Id);
+                                        <div class="col-md-4 col-sm-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="SkillIds" value="@skill.Id" id="skill_@skill.Id" checked="@isSelected" />
+                                                <label class="form-check-label small text-light" for="skill_@skill.Id">
+                                                    @skill.Name
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label small text-secondary fw-bold">شرح موقعیت شغلی، مسئولیت‌ها و شرایط احراز <span class="text-danger">*</span></label>
+                                <textarea asp-for="Description" class="form-control bg-dark text-white border-0 py-2 rounded-3 shadow-none neon-input" rows="8" placeholder="توضیحات و شرایط استخدام را به صورت تفصیلی بنویسید (حداقل ۱۰ کاراکتر)..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger small mt-1 d-block"></span>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 pt-3 border-top border-secondary border-opacity-25 text-end">
+                            <button type="submit" class="btn btn-primary px-5 rounded-3 fw-bold py-3 shadow-lg bg-gradient border-0" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);">
+                                انتشار و ثبت نهایی آگهی استخدام 🚀
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    .transition-nav {
+        transition: all 0.25s ease-in-out;
+    }
+    .hover-glass:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        transform: scale(1.02);
+    }
+    .neon-input:focus {
+        background: rgba(15, 23, 42, 0.95) !important;
+        border-color: #f97316 !important;
+        box-shadow: 0 0 15px rgba(249, 115, 22, 0.25) !important;
+        color: #fff !important;
+    }
+</style>

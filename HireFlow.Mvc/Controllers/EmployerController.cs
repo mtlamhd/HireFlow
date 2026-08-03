@@ -3,46 +3,59 @@ using HireFlow.Business.Authentications.Constants;
 using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.AttachmentDto;
 using HireFlow.Domain.Dtos.CompanyDto;
+using HireFlow.Domain.Dtos.JobAdDto;
 using HireFlow.Domain.Dtos.UserDto;
 using HireFlow.Domain.Entities;
+using HireFlow.Domain.Enums;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
 using HireFlow.Domain.Interfaces.Repo;
 using HireFlow.Mvc.Models.EmployerView;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
-namespace HireFlow.Mvc.Controllers;
-
-[Authorize(Roles = RoleConstants.EmployerRoleName)]
-public class EmployerController : Controller
+namespace HireFlow.Mvc.Controllers
 {
-    private readonly IEmployerProfileService _employerProfileService;
-    private readonly IAttachmentService _attachmentService;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ICompanyService _companyService;
-    private readonly UserManager<User> _userManager;
-
-    public EmployerController(
-        IEmployerProfileService employerProfileService,
-        IAttachmentService attachmentService, IUnitOfWork unitOfWork, UserManager<User> userManager, ICompanyService companyService)
+    [Authorize(Roles = RoleConstants.EmployerRoleName)]
+    public class EmployerController : Controller
     {
-        _employerProfileService = employerProfileService;
-        _attachmentService = attachmentService;
-        _unitOfWork = unitOfWork;
-        _userManager = userManager;
-        _companyService = companyService;
-    }
+        private readonly IEmployerProfileService _employerProfileService;
+        private readonly IAttachmentService _attachmentService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ICompanyService _companyService;
+        private readonly IJobAdService _jobAdService;
+        private readonly UserManager<User> _userManager;
 
-    private Guid GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim))
-            throw new UnauthorizedAccessException("User is not authenticated.");
+        public EmployerController(
+            IEmployerProfileService employerProfileService,
+            IAttachmentService attachmentService, 
+            IUnitOfWork unitOfWork, 
+            UserManager<User> userManager, 
+            ICompanyService companyService,
+            IJobAdService jobAdService)
+        {
+            _employerProfileService = employerProfileService;
+            _attachmentService = attachmentService;
+            _unitOfWork = unitOfWork;
+            _userManager = userManager;
+            _companyService = companyService;
+            _jobAdService = jobAdService;
+        }
 
-        return Guid.Parse(userIdClaim);
-    }
-    [HttpGet]
+        // واکشی امن شناسه کاربر لاگین شده از Claim ها
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new ResourceAccessDeniedException("کاربر احراز هویت نشده است.");
+
+            return Guid.Parse(userIdClaim);
+        }
+
+        // =========================================================================
+        // بخش ۱: مشخصات فردی کارفرما (Personal Profile) - همیشه باز است
+        // =========================================================================
+
+        [HttpGet]
         public async Task<IActionResult> Profile()
         {
             try
@@ -50,7 +63,6 @@ public class EmployerController : Controller
                 var userId = GetCurrentUserId();
                 var profileDto = await _employerProfileService.GetMyProfileAsync(userId);
                 
-               
                 var viewModel = new UpdateEmployerProfileViewModel
                 {
                     FirstName = profileDto.FirstName ?? string.Empty,
@@ -71,7 +83,6 @@ public class EmployerController : Controller
             }
         }
 
-       
         [HttpPost]
         public async Task<IActionResult> Profile(UpdateEmployerProfileViewModel model)
         {
@@ -79,7 +90,6 @@ public class EmployerController : Controller
 
             if (!ModelState.IsValid)
             {
-                
                 var originalProfile = await _employerProfileService.GetMyProfileAsync(userId);
                 model.PhoneNumber = originalProfile.Username;
                 model.ProfileImageId = originalProfile.ProfileImageId;
@@ -88,7 +98,6 @@ public class EmployerController : Controller
 
             try
             {
-                
                 var updateDto = new UpdateEmployerProfileDto
                 {
                     FirstName = model.FirstName,
@@ -104,13 +113,14 @@ public class EmployerController : Controller
             }
             catch (BaseAppException ex)
             {
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError(string.Empty, ex.Message);
                 var originalProfile = await _employerProfileService.GetMyProfileAsync(userId);
                 model.PhoneNumber = originalProfile.Username;
                 model.ProfileImageId = originalProfile.ProfileImageId;
                 return View(model);
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> UploadProfileImage(IFormFile imageFile)
         {
@@ -155,32 +165,34 @@ public class EmployerController : Controller
             }
             return RedirectToAction(nameof(Profile));
         }
-        [HttpGet]
-        public async Task<IActionResult> GetAttachment(Guid id)
-        {
-            var attachment = await _unitOfWork.Attachments.GetByIdAsync(id);
-            if (attachment == null)
-                return NotFound();
 
-            return File(attachment.Data, attachment.ContentType);
-        }
+        // =========================================================================
+        // بخش ۲: مدیریت اطلاعات شرکت (Company) - قفل ویرایش در وضعیت عدم تایید
+        // =========================================================================
+
         [HttpGet]
         public async Task<IActionResult> Company()
         {
             try
             {
                 var userId = GetCurrentUserId();
-                var company = await _companyService.GetMyCompanyAsync(userId);
+                var companyDto = await _companyService.GetMyCompanyAsync(userId);
 
-               
-                ViewBag.Cities = await _unitOfWork.Cities.QueryAsync(c => true, new Paging { PageSize = 100 });
-                ViewBag.Categories = await _unitOfWork.Categories.QueryAsync(c => true, new Paging { PageSize = 100 });
+                var viewModel = new UpdateCompanyViewModel
+                {
+                    Name = companyDto.Name,
+                    Description = companyDto.Description ?? string.Empty,
+                    Website = companyDto.Website ?? string.Empty,
+                    Email = companyDto.Email ?? string.Empty,
+                    PhoneNumber = companyDto.PhoneNumber ?? string.Empty,
+                    Address = companyDto.Address ?? string.Empty,
+                    CityId = companyDto.CityId,
+                    LogoId = companyDto.LogoId,
+                    CategoryIds = companyDto.Categories.Select(c => c.Id).ToList()
+                };
 
-               
-                var user = await _userManager.FindByIdAsync(userId.ToString());
-                ViewBag.IsApproved = user?.IsApproved ?? false;
-
-                return View(company);
+                await FillCompanyViewBagsAsync(userId);
+                return View(viewModel);
             }
             catch (BaseAppException ex)
             {
@@ -189,40 +201,65 @@ public class EmployerController : Controller
             }
         }
 
-      
         [HttpPost]
-        public async Task<IActionResult> Company(UpdateCompanyDto dto)
+        public async Task<IActionResult> Company(UpdateCompanyViewModel model)
         {
             var userId = GetCurrentUserId();
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
-           
+            // گارد تایید ادمین برای عملیات ذخیره‌سازی شرکت
             if (user == null || !user.IsApproved)
             {
                 TempData["Error"] = "⚠️ حساب کاربری شما هنوز توسط ادمین تایید نشده است. امکان ویرایش اطلاعات شرکت وجود ندارد.";
                 return RedirectToAction(nameof(Company));
             }
 
+            // نرمال‌سازی هوشمند فیلد وب‌سایت قبل از اجرای ولیدیشن
+            if (!string.IsNullOrWhiteSpace(model.Website))
+            {
+                var trimmed = model.Website.Trim();
+                if (!trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && 
+                    !trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                {
+                    model.Website = "https://" + trimmed;
+                }
+                
+                ModelState.Remove(nameof(model.Website));
+                TryValidateModel(model);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await FillCompanyViewBagsAsync(userId);
+                return View(model);
+            }
+
             try
             {
+                var dto = new UpdateCompanyDto
+                {
+                    Name = model.Name,
+                    Description = model.Description,
+                    Website = model.Website,
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                    Address = model.Address,
+                    CityId = model.CityId,
+                    CategoryIds = model.CategoryIds
+                };
+
                 await _companyService.UpdateMyCompanyAsync(userId, dto);
                 TempData["Message"] = "اطلاعات شرکت با موفقیت به‌روزرسانی شد. 🏢";
                 return RedirectToAction(nameof(Company));
             }
             catch (BaseAppException ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                var company = await _companyService.GetMyCompanyAsync(userId);
-                
-                ViewBag.Cities = await _unitOfWork.Cities.QueryAsync(c => true, new Paging { PageSize = 100 });
-                ViewBag.Categories = await _unitOfWork.Categories.QueryAsync(c => true, new Paging { PageSize = 100 });
-                ViewBag.IsApproved = user.IsApproved;
-
-                return View(company);
+                ModelState.AddModelError(string.Empty, ex.Message);
+                await FillCompanyViewBagsAsync(userId);
+                return View(model);
             }
         }
 
-      
         [HttpPost]
         public async Task<IActionResult> UploadLogo(IFormFile logoFile)
         {
@@ -251,7 +288,7 @@ public class EmployerController : Controller
                 });
 
                 await _companyService.SetMyCompanyLogoAsync(userId, attachmentResult.Id);
-                TempData["Message"] = "لوگوی شرکت با موفقیت آپلود شد.";
+                TempData["Message"] = "لوگوی شرکت با موفقیت آپلود شد. 🎨";
             }
             catch (BaseAppException ex)
             {
@@ -260,7 +297,6 @@ public class EmployerController : Controller
             return RedirectToAction(nameof(Company));
         }
 
-     
         [HttpPost]
         public async Task<IActionResult> RemoveLogo()
         {
@@ -284,4 +320,280 @@ public class EmployerController : Controller
             }
             return RedirectToAction(nameof(Company));
         }
+
+        private async Task FillCompanyViewBagsAsync(Guid userId)
+        {
+            ViewBag.Cities = await _unitOfWork.Cities.QueryAsync(c => true, new Paging { PageSize = 100 });
+            ViewBag.Categories = await _unitOfWork.Categories.QueryAsync(c => true, new Paging { PageSize = 100 });
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            ViewBag.IsApproved = user?.IsApproved ?? false;
+        }
+
+        // =========================================================================
+        // بخش ۳: مدیریت آگهی‌های استخدامی (Job Ads) - قفل مطلق در صورت عدم تایید
+        // =========================================================================
+
+        [HttpGet]
+        public async Task<IActionResult> JobAds()
+        {
+            var userId = GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            
+            // گارد ورود به صفحه لیست آگهی‌ها
+            if (user == null || !user.IsApproved)
+            {
+                TempData["Error"] = "⚠️ حساب کاربری شما هنوز توسط ادمین تایید نشده است. امکان دسترسی به مدیریت آگهی‌ها وجود ندارد.";
+                return RedirectToAction(nameof(Company));
+            }
+
+            try
+            {
+                var jobAds = await _jobAdService.GetMyCompanyJobAdsAsync(userId);
+                ViewBag.IsApproved = user.IsApproved;
+                return View(jobAds);
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Profile));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleActive(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null || !user.IsApproved)
+            {
+                TempData["Error"] = "⚠️ حساب کاربری شما تایید صلاحیت نشده است.";
+                return RedirectToAction(nameof(Company));
+            }
+
+            try
+            {
+                var jobAd = await _unitOfWork.JobAds.GetByIdAsync(id);
+                if (jobAd == null)
+                    return NotFound();
+
+                if (jobAd.IsActive)
+                {
+                    await _jobAdService.DeactivateJobAdAsync(userId, id);
+                    TempData["Message"] = "آگهی استخدام با موفقیت غیرفعال شد. ⏸️";
+                }
+                else
+                {
+                    await _jobAdService.ActivateJobAdAsync(userId, id);
+                    TempData["Message"] = "آگهی استخدام مجدداً فعال شد. 🟢";
+                }
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(JobAds));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteJobAd(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null || !user.IsApproved)
+            {
+                TempData["Error"] = "⚠️ حساب کاربری شما تایید صلاحیت نشده است.";
+                return RedirectToAction(nameof(Company));
+            }
+
+            try
+            {
+                await _jobAdService.DeleteJobAdAsync(userId, id);
+                TempData["Message"] = "آگهی استخدام با موفقیت حذف نرم‌افزاری شد. 🗑️";
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(JobAds));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateJobAd()
+        {
+            var userId = GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            
+            if (user == null || !user.IsApproved)
+            {
+                TempData["Error"] = "⚠️ حساب کاربری شما تایید صلاحیت نشده است.";
+                return RedirectToAction(nameof(Company));
+            }
+
+            await FillJobAdViewBagsAsync();
+            return View(new CreateJobAdViewModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateJobAd(CreateJobAdViewModel model)
+        {
+            var userId = GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null || !user.IsApproved)
+            {
+                TempData["Error"] = "⚠️ حساب کاربری شما هنوز تایید نشده است.";
+                return RedirectToAction(nameof(Company));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await FillJobAdViewBagsAsync();
+                return View(model);
+            }
+
+            try
+            {
+                var dto = new CreateJobAdDto
+                {
+                    Title = model.Title,
+                    Description = model.Description,
+                    CityId = model.CityId,
+                    CategoryId = model.CategoryId,
+                    Salary = model.Salary,
+                    EmploymentType = model.EmploymentType,
+                    SkillIds = model.SkillIds
+                };
+
+                await _jobAdService.CreateJobAdAsync(userId, dto);
+                TempData["Message"] = "فرصت شغلی جدید با موفقیت منتشر شد. 🚀";
+                return RedirectToAction(nameof(JobAds));
+            }
+            catch (BaseAppException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                await FillJobAdViewBagsAsync();
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditJobAd(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null || !user.IsApproved)
+            {
+                TempData["Error"] = "⚠️ حساب کاربری شما هنوز تایید صلاحیت نشده است.";
+                return RedirectToAction(nameof(Company));
+            }
+
+            try
+            {
+                var details = await _jobAdService.GetMyJobAdDetailsAsync(userId, id);
+
+                var viewModel = new EditJobAdViewModel
+                {
+                    Id = details.Id,
+                    Title = details.Title,
+                    Description = details.Description,
+                    CityId = details.CityId,
+                    CategoryId = details.CategoryId,
+                    Salary = details.Salary,
+                    EmploymentType = details.EmploymentType,
+                    SkillIds = details.Skills.Select(s => s.Id).ToList()
+                };
+
+                await FillJobAdViewBagsAsync();
+                return View(viewModel);
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(JobAds));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditJobAd(EditJobAdViewModel model)
+        {
+            var userId = GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null || !user.IsApproved)
+            {
+                TempData["Error"] = "⚠️ حساب کاربری شما تایید صلاحیت نشده است.";
+                return RedirectToAction(nameof(Company));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await FillJobAdViewBagsAsync();
+                return View(model);
+            }
+
+            try
+            {
+                var dto = new UpdateJobAdDto
+                {
+                    Title = model.Title,
+                    Description = model.Description,
+                    CityId = model.CityId,
+                    CategoryId = model.CategoryId,
+                    Salary = model.Salary,
+                    EmploymentType = model.EmploymentType,
+                    SkillIds = model.SkillIds
+                };
+
+                await _jobAdService.UpdateJobAdAsync(userId, model.Id, dto);
+                TempData["Message"] = "تغییرات فرصت شغلی با موفقیت ثبت شد. ✨";
+                return RedirectToAction(nameof(JobAds));
+            }
+            catch (BaseAppException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                await FillJobAdViewBagsAsync();
+                return View(model);
+            }
+        }
+
+        private async Task FillJobAdViewBagsAsync()
+        {
+            ViewBag.Cities = await _unitOfWork.Cities.QueryAsync(c => true, new Paging { PageSize = 100 });
+            ViewBag.Categories = await _unitOfWork.Categories.QueryAsync(c => true, new Paging { PageSize = 100 });
+            ViewBag.Skills = await _unitOfWork.Skills.QueryAsync(s => true, new Paging { PageSize = 200 });
+
+            ViewBag.EmploymentTypes = Enum.GetValues(typeof(EmploymentTypeEnum))
+                .Cast<EmploymentTypeEnum>()
+                .Select(e => new { Value = (int)e, Name = GetEmploymentTypeName(e) })
+                .ToList();
+        }
+
+        private static string GetEmploymentTypeName(EmploymentTypeEnum type)
+        {
+            return type switch
+            {
+                EmploymentTypeEnum.FullTime => "تمام‌وقت",
+                EmploymentTypeEnum.PartTime => "پاره‌وقت",
+                EmploymentTypeEnum.Contract => "قراردادی",
+                EmploymentTypeEnum.Internship => "کارآموزی",
+                EmploymentTypeEnum.Remote => "دورکاری",
+                _ => type.ToString()
+            };
+        }
+
+      
+        [HttpGet]
+        public async Task<IActionResult> GetAttachment(Guid id)
+        {
+            var attachment = await _unitOfWork.Attachments.GetByIdAsync(id);
+            if (attachment == null)
+                return NotFound();
+
+            return File(attachment.Data, attachment.ContentType);
+        }
+    }
 }
