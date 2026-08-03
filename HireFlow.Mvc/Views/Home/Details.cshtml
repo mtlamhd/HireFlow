@@ -1,6 +1,8 @@
+@using HireFlow.Business.Authentications.Constants
 @using HireFlow.Domain.Entities
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
 @model HireFlow.Domain.Dtos.JobAdDto.PublicJobAdDetailsDto
 @{
     ViewData["Title"] = Model.Title;
@@ -76,8 +78,10 @@
                         </div>
                     }
 
-                    <!-- باکس درخواست (هوشمند بر اساس وضعیت لاگین) -->
+                    <!-- باکس درخواست (هوشمند بر اساس نقش کاربر) -->
                     <div class="rounded-4 p-4 text-center" style="background: radial-gradient(circle at 50% 0%, #312e81 0%, #0f172a 100%); border: 1px solid rgba(99, 102, 241, 0.3);">
+                        
+                        <!-- کادرهای نمایش خطا یا موفقیت -->
                         @if (TempData["Error"] != null)
                         {
                             <div class="alert rounded-4 p-3 mb-4 text-center fw-bold shadow-sm border-0" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">
@@ -91,28 +95,45 @@
                             </div>
                         }
 
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            // بررسی نقش کاربر لاگین‌کرده (آیا کارفرما است؟)
+                            var currentUser = await UserManager.GetUserAsync(User);
+                            var isEmployer = currentUser != null && await UserManager.IsInRoleAsync(currentUser, RoleConstants.EmployerRoleName);
 
-                        <h4 class="fw-bold text-white mb-2">آماده‌ی پیوستن به این تیم هستی؟</h4>
-                        <p class="text-secondary small mb-4">با یک کلیک رزومه‌ات را ارسال کن و مسیر شغلی‌ات را تغییر بده.</p>
-                        <div>
-                            @if (SignInManager.IsSignedIn(User))
+                            if (isEmployer)
                             {
-                                <!-- کاربر لاگین کرده: دکمه ارسال درخواست -->
-                                <form asp-controller="JobSeeker" asp-action="Apply" method="post" class="d-inline">
-                                    <input type="hidden" name="jobAdId" value="@Model.Id"/>
-                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold px-5 shadow-lg bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
-                                        ارسال درخواست همکاری 🚀
-                                    </button>
-                                </form>
+                                <!-- هشدار به کارفرما -->
+                                <div class="alert rounded-3 p-3 mb-0 fw-bold border-0 text-center" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+                                    ⚠️ شما با حساب کارفرمایی وارد شده‌اید. فقط کارجوها می‌توانند درخواست برای همکاری ارسال کنند.
+                                </div>
                             }
                             else
                             {
-                                <!-- کاربر لاگین نکرده: هدایت به صفحه لاگین -->
+                                <!-- کارجو است: نمایش دکمه ارسال درخواست -->
+                                <h4 class="fw-bold text-white mb-2">آماده‌ی پیوستن به این تیم هستی؟</h4>
+                                <p class="text-secondary small mb-4">با یک کلیک رزومه‌ات را ارسال کن و مسیر شغلی‌ات را تغییر بده.</p>
+                                <div>
+                                    <form asp-controller="JobSeeker" asp-action="Apply" method="post" class="d-inline">
+                                        <input type="hidden" name="jobAdId" value="@Model.Id"/>
+                                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold px-5 shadow-lg bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                                            ارسال درخواست همکاری 🚀
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <!-- کاربر لاگین نکرده است -->
+                            <h4 class="fw-bold text-white mb-2">آماده‌ی پیوستن به این تیم هستی؟</h4>
+                            <p class="text-secondary small mb-4">با یک کلیک رزومه‌ات را ارسال کن و مسیر شغلی‌ات را تغییر بده.</p>
+                            <div>
                                 <a asp-controller="Auth" asp-action="Login" class="btn btn-warning btn-lg rounded-pill fw-bold px-4 shadow-lg text-dark">
                                     🔐 برای ارسال درخواست، ابتدا وارد سایت شوید
                                 </a>
-                            }
-                        </div>
+                            </div>
+                        }
                     </div>
 
                 </div>

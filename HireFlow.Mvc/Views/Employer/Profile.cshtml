@@ -1,6 +1,13 @@
+@using HireFlow.Business.Authentications.Constants
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<HireFlow.Domain.Entities.User> UserManager
 @model HireFlow.Mvc.Models.EmployerView.UpdateEmployerProfileViewModel
 @{
     ViewData["Title"] = "پروفایل کارفرما";
+    
+    // واکشی پویای وضعیت تایید با نام کامل کلاس دامین جهت رفع خطای کامپایلر
+    var currentUser = await UserManager.GetUserAsync(User);
+    bool isApproved = currentUser?.IsApproved ?? false;
 }
 
 <div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
@@ -15,7 +22,7 @@
             <a asp-controller="Home" asp-action="Index" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">← بازگشت به سایت</a>
         </div>
 
-        <!-- پیام‌ها -->
+        <!-- نمایش پیام‌های موقت سیستم -->
         @if (TempData["Message"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
@@ -33,18 +40,18 @@
 
         <div class="row g-4">
             
-            <!-- ستون راست: عکس پروفایل و دکمه حذف -->
+            <!-- ستون راست: عکس پرسنلی و ناوبری سایدبار -->
             <div class="col-lg-4">
+                
+                <!-- کارت تصویر کارفرما -->
                 <div class="card border-0 shadow-lg rounded-4 p-4 mb-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <div class="position-relative d-inline-block mx-auto mb-3">
                         @if (Model.ProfileImageId.HasValue && Model.ProfileImageId.Value != Guid.Empty)
                         {
-                            <!-- نمایش عکس آپلود شده -->
                             <img src="@Url.Action("GetAttachment", "Employer", new { id = Model.ProfileImageId })" class="rounded-circle shadow-lg mx-auto" style="width: 110px; height: 110px; object-fit: cover; border: 2px solid rgba(249, 115, 22, 0.5);" alt="Profile Image" />
                         }
                         else
                         {
-                            <!-- اگر عکسی نبود -->
                             <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-lg mx-auto" style="width: 110px; height: 110px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); font-size: 36px;">
                                 @(string.IsNullOrEmpty(Model.FirstName) ? "👤" : Model.FirstName.Substring(0, 1))
                             </div>
@@ -53,7 +60,7 @@
                     <h5 class="fw-bold text-white mb-1">@(string.IsNullOrEmpty(Model.FirstName) ? "کارفرما عزیز" : $"{Model.FirstName} {Model.LastName}")</h5>
                     <p class="text-secondary small mb-4">@Model.PhoneNumber</p>
 
-                    <!-- فرم آپلود / تغییر عکس -->
+                    <!-- فرم بارگذاری عکس پروفایل -->
                     <form asp-action="UploadProfileImage" method="post" enctype="multipart/form-data" class="mb-2">
                         <input type="file" name="imageFile" accept="image/*" class="form-control form-control-sm bg-dark text-white border-secondary mb-2 rounded-3" required />
                         <button type="submit" class="btn btn-outline-light btn-sm w-100 rounded-3">
@@ -61,7 +68,6 @@
                         </button>
                     </form>
 
-                    <!-- فرم حذف عکس (فقط اگر عکس وجود داشت نشان داده شود) -->
                     @if (Model.ProfileImageId.HasValue && Model.ProfileImageId.Value != Guid.Empty)
                     {
                         <form asp-action="RemoveProfileImage" method="post" class="mt-2">
@@ -71,6 +77,26 @@
                         </form>
                     }
                 </div>
+
+                <!-- سایدبار ناوبری یکپارچه کارفرما -->
+                <div class="card border-0 shadow-lg rounded-4 p-3" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div class="list-group list-group-flush gap-2 border-0">
+                        
+                        <!-- لینک ۱: مشخصات فردی (فعال - رنگ نارنجی تم) -->
+                        <a asp-controller="Employer" asp-action="Profile" class="list-group-item list-group-item-action rounded-3 border-0 py-3 px-4 d-flex align-items-center justify-content-between transition-nav" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white !important;">
+                            <span>👤 مشخصات فردی کارفرما</span>
+                            <span>←</span>
+                        </a>
+
+                        <!-- لینک ۲: اطلاعات رسمی شرکت (همیشه باز) -->
+                        <a asp-controller="Employer" asp-action="Company" class="list-group-item list-group-item-action rounded-3 border-0 py-3 px-4 d-flex align-items-center justify-content-between text-white transition-nav hover-glass" style="background: rgba(255,255,255,0.02);">
+                            <span>🏢 اطلاعات رسمی شرکت</span>
+                            <span class="text-secondary">←</span>
+                        </a>
+
+                    </div>
+                </div>
+
             </div>
 
             <!-- ستون چپ: فرم ویرایش مشخصات با خطاهای زیر فیلد -->
@@ -84,13 +110,13 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label small text-secondary fw-bold">نام</label>
-                                <input asp-for="FirstName" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none" placeholder="نام..." />
+                                <input asp-for="FirstName" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" placeholder="نام..." />
                                 <span asp-validation-for="FirstName" class="text-danger small mt-1 d-block"></span>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label small text-secondary fw-bold">نام خانوادگی</label>
-                                <input asp-for="LastName" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none" placeholder="نام خانوادگی..." />
+                                <input asp-for="LastName" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" placeholder="نام خانوادگی..." />
                                 <span asp-validation-for="LastName" class="text-danger small mt-1 d-block"></span>
                             </div>
 
@@ -102,19 +128,19 @@
 
                             <div class="col-md-6">
                                 <label class="form-label small text-secondary fw-bold">ایمیل</label>
-                                <input asp-for="Email" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none" placeholder="example@email.com" />
+                                <input asp-for="Email" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" placeholder="example@email.com" />
                                 <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label small text-secondary fw-bold">کد ملی (۱۰ رقم)</label>
-                                <input asp-for="NationalId" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none" placeholder="0012345678" maxlength="10" />
+                                <input asp-for="NationalId" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" placeholder="0012345678" maxlength="10" />
                                 <span asp-validation-for="NationalId" class="text-danger small mt-1 d-block"></span>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label small text-secondary fw-bold">تاریخ تولد</label>
-                                <input asp-for="BirthDate" type="date" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none" />
+                                <input asp-for="BirthDate" type="date" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" />
                                 <span asp-validation-for="BirthDate" class="text-danger small mt-1 d-block"></span>
                             </div>
                         </div>
@@ -131,3 +157,19 @@
         </div>
     </div>
 </div>
+
+<style>
+    .transition-nav {
+        transition: all 0.25s ease-in-out;
+    }
+    .hover-glass:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        transform: scale(1.02);
+    }
+    .neon-input:focus {
+        background: rgba(15, 23, 42, 0.95) !important;
+        border: 1px solid #f97316 !important;
+        box-shadow: 0 0 15px rgba(249, 115, 22, 0.25) !important;
+        color: #fff !important;
+    }
+</style>

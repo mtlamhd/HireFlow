@@ -42,7 +42,7 @@ namespace HireFlow.Mvc.Controllers
             return Guid.Parse(userIdClaim);
         }
 
-        
+        // --- ۱. نمایش صفحه پروفایل (GET) ---
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
@@ -64,8 +64,12 @@ namespace HireFlow.Mvc.Controllers
                     NationalId = profileDto.NationalId,
                     ProfileImageId = profileDto.ProfileImageId,
                     ResumeId = profileDto.ResumeId,
-                    Skills = profileDto.Skills
+                    Skills = profileDto.Skills,
+                    SkillIds = profileDto.Skills.Select(s => s.Id).ToList() 
                 };
+
+               
+                ViewBag.AllSkills = await _unitOfWork.Skills.QueryAsync(s => true, new Paging { PageSize = 200 });
 
                 return View(viewModel);
             }
@@ -76,7 +80,7 @@ namespace HireFlow.Mvc.Controllers
             }
         }
 
-        
+       
         [HttpPost]
         public async Task<IActionResult> Profile(JobSeekerProfileViewModel model)
         {
@@ -92,6 +96,7 @@ namespace HireFlow.Mvc.Controllers
                     model.ResumeId = originalProfile.ResumeId;
                     model.ProfileImageId = originalProfile.ProfileImageId;
                 }
+                ViewBag.AllSkills = await _unitOfWork.Skills.QueryAsync(s => true, new Paging { PageSize = 200 });
                 return View(model);
             }
 
@@ -104,11 +109,11 @@ namespace HireFlow.Mvc.Controllers
                     Email = model.Email!,
                     BirthDate = model.BirthDate ?? DateTime.UtcNow,
                     NationalId = model.NationalId!,
-                    SkillIds = model.SkillIds
+                    SkillIds = model.SkillIds 
                 };
 
                 await _profileService.UpdateMyProfileAsync(userId, updateDto);
-                TempData["Message"] = "پروفایل شما با موفقیت به‌روزرسانی شد. ✨";
+                TempData["Message"] = "پروفایل و مهارت‌های شما با موفقیت به‌روزرسانی شد. ✨";
                 return RedirectToAction(nameof(Profile));
             }
             catch (BaseAppException ex)
@@ -120,11 +125,12 @@ namespace HireFlow.Mvc.Controllers
                     model.PhoneNumber = originalProfile.PhoneNumber;
                     model.Skills = originalProfile.Skills;
                 }
+                ViewBag.AllSkills = await _unitOfWork.Skills.QueryAsync(s => true, new Paging { PageSize = 200 });
                 return View(model);
             }
         }
 
-       
+        
         [HttpPost]
         public async Task<IActionResult> UploadResume(IFormFile resumeFile)
         {
@@ -159,7 +165,7 @@ namespace HireFlow.Mvc.Controllers
             }
         }
 
-        
+       
         [HttpPost]
         public async Task<IActionResult> RemoveResume()
         {
@@ -176,7 +182,7 @@ namespace HireFlow.Mvc.Controllers
             return RedirectToAction(nameof(Profile));
         }
 
-       
+        
         [HttpPost]
         public async Task<IActionResult> UploadProfileImage(IFormFile imageFile)
         {
@@ -207,7 +213,7 @@ namespace HireFlow.Mvc.Controllers
             }
         }
 
-       
+        // --- ۶. حذف عکس پروفایل ---
         [HttpPost]
         public async Task<IActionResult> RemoveProfileImage()
         {
@@ -236,7 +242,6 @@ namespace HireFlow.Mvc.Controllers
         }
 
        
-        
         [HttpPost]
         public async Task<IActionResult> Apply(Guid jobAdId)
         {
@@ -244,25 +249,19 @@ namespace HireFlow.Mvc.Controllers
             {
                 var userId = GetCurrentUserId();
                 await _requestService.ApplyForJobAdAsync(userId, new ApplyJobAdDto { JobAdId = jobAdId });
-                
-               
                 TempData["Message"] = "درخواست همکاری شما با موفقیت ارسال شد! 🚀";
             }
             catch (BaseAppException ex)
             {
                 string errorMsg = ex.Message;
-                
-              
                 if (errorMsg.Contains("resume", StringComparison.OrdinalIgnoreCase))
                 {
                     errorMsg = "⚠️ برای ارسال درخواست، ابتدا باید رزومه PDF خود را در پنل کاربری آپلود کنید!";
                 }
-              
                 else if (ex is ConflictException || errorMsg.Contains("already submitted", StringComparison.OrdinalIgnoreCase))
                 {
                     errorMsg = "⚠️ شما قبلاً برای این فرصت شغلی درخواست ارسال کرده‌اید!";
                 }
-
                 TempData["Error"] = errorMsg;
             }
             catch (Exception)
@@ -289,7 +288,8 @@ namespace HireFlow.Mvc.Controllers
                 return RedirectToAction(nameof(Profile));
             }
         }
-        
+
+       
         [HttpPost]
         public async Task<IActionResult> CancelRequest(Guid id)
         {

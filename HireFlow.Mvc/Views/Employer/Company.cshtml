@@ -1,0 +1,208 @@
+@using HireFlow.Domain.Entities
+@model HireFlow.Domain.Dtos.CompanyDto.CompanyDetailsDto
+@{
+    ViewData["Title"] = "مدیریت شرکت";
+    var cities = ViewBag.Cities as List<City> ?? new List<City>();
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    bool isApproved = ViewBag.IsApproved ?? false;
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container">
+        
+        <!-- هدر -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(249, 115, 22, 0.15); color: #fb923c;">🏢 پروفایل شرکت</span>
+                <h1 class="fw-bold text-white mb-0">مدیریت اطلاعات و لوگوی شرکت</h1>
+            </div>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">← بازگشت به سایت</a>
+        </div>
+
+        <!-- هشدارهای تایید صلاحیت -->
+        @if (!isApproved)
+        {
+            <div class="alert rounded-4 p-4 mb-4 fw-bold border-0 shadow-lg" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2) !important;">
+                ⚠️ <strong>اطلاعات شرکت در وضعیت فقط خواندنی (قفل شده) است.</strong><br>
+                حساب کاربری شما هنوز توسط ادمین تایید نشده است. شما می‌توانید اطلاعات شرکت را مشاهده کنید، اما برای ویرایش اطلاعات و آپلود لوگوی رسمی، باید منتظر تایید صلاحیت توسط ادمین بمانید.
+            </div>
+        }
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
+                ✨ @TempData["Message"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            
+            <!-- ستون راست: لوگو + سایدبار ناوبری هوشمند دوطرفه -->
+            <div class="col-lg-4">
+                
+                <!-- کارت لوگوی شرکت -->
+                <div class="card border-0 shadow-lg rounded-4 p-4 mb-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div class="position-relative d-inline-block mx-auto mb-3">
+                        @if (Model.LogoId.HasValue && Model.LogoId.Value != Guid.Empty)
+                        {
+                            <img src="@Url.Action("GetAttachment", "Employer", new { id = Model.LogoId })" class="rounded-4 shadow-lg mx-auto" style="width: 110px; height: 110px; object-fit: cover; border: 2px solid rgba(249, 115, 22, 0.5);" alt="Company Logo" />
+                        }
+                        else
+                        {
+                            <div class="rounded-4 d-flex align-items-center justify-content-center fw-bold text-white shadow-lg mx-auto" style="width: 110px; height: 110px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); font-size: 36px;">
+                                @(string.IsNullOrEmpty(Model.Name) ? "🏢" : Model.Name.Substring(0, 1))
+                            </div>
+                        }
+                    </div>
+                    <h5 class="fw-bold text-white mb-1">@Model.Name</h5>
+                    <p class="text-secondary small mb-4">@Model.Email</p>
+
+                    @if (isApproved)
+                    {
+                        <form asp-action="UploadLogo" method="post" enctype="multipart/form-data" class="mb-2">
+                            <input type="file" name="logoFile" accept="image/*" class="form-control form-control-sm bg-dark text-white border-secondary mb-2 rounded-3" required />
+                            <button type="submit" class="btn btn-outline-light btn-sm w-100 rounded-3">آپلود لوگوی شرکت</button>
+                        </form>
+
+                        @if (Model.LogoId.HasValue && Model.LogoId.Value != Guid.Empty)
+                        {
+                            <form asp-action="RemoveLogo" method="post" class="mt-2">
+                                <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-3">🗑️ حذف لوگو</button>
+                            </form>
+                        }
+                    }
+                    else
+                    {
+                        <span class="badge rounded-pill bg-dark text-secondary px-3 py-2 border border-secondary border-opacity-10 small">🔒 قفل شده</span>
+                    }
+                </div>
+
+                <!-- سایدبار ناوبری هوشمند (منوی شرکت فعال است) -->
+                <div class="card border-0 shadow-lg rounded-4 p-3" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div class="list-group list-group-flush gap-2 border-0">
+                        
+                        <!-- مشخصات فردی (منوی عادی) -->
+                        <a asp-controller="Employer" asp-action="Profile" class="list-group-item list-group-item-action rounded-3 border-0 py-3 px-4 d-flex align-items-center justify-content-between text-white transition-nav hover-glass" style="background: rgba(255,255,255,0.02);">
+                            <span>👤 مشخصات فردی کارفرما</span>
+                            <span class="text-secondary">←</span>
+                        </a>
+
+                        <!-- اطلاعات رسمی شرکت (فعال) -->
+                        <a asp-controller="Employer" asp-action="Company" class="list-group-item list-group-item-action rounded-3 border-0 py-3 px-4 d-flex align-items-center justify-content-between transition-nav" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white !important;">
+                            <span>🏢 اطلاعات رسمی شرکت</span>
+                            <span>←</span>
+                        </a>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ستون چپ: فرم اطلاعات شرکت -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h4 class="fw-bold text-white mb-4">اطلاعات رسمی شرکت</h4>
+
+                    <form asp-action="Company" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3 p-2 bg-danger bg-opacity-10 rounded-3"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">نام شرکت</label>
+                                <input name="Name" value="@Model.Name" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" @(isApproved ? "" : "disabled") required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">ایمیل رسمی شرکت</label>
+                                <input name="Email" type="email" value="@Model.Email" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" @(isApproved ? "" : "disabled") />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">تلفن تماس شرکت</label>
+                                <input name="PhoneNumber" value="@Model.PhoneNumber" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" @(isApproved ? "" : "disabled") />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">آدرس وب‌سایت</label>
+                                <input name="Website" value="@Model.Website" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" placeholder="https://example.com" @(isApproved ? "" : "disabled") />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary fw-bold">شهر محل استقرار</label>
+                                <select name="CityId" class="form-select bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" @(isApproved ? "" : "disabled")>
+                                    <option value="">انتخاب شهر...</option>
+                                    @foreach (var city in cities)
+                                    {
+                                        <option value="@city.Id" selected="@(Model.CityId == city.Id)">@city.Name</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label small text-secondary fw-bold">آدرس فیزیکی دفتر شرکت</label>
+                                <input name="Address" value="@Model.Address" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" @(isApproved ? "" : "disabled") />
+                            </div>
+
+                            <div class="col-md-12 my-4">
+                                <label class="form-label small text-secondary fw-bold mb-2">حوزه‌های فعالیت شرکت (دسته‌بندی‌ها)</label>
+                                <div class="row g-2 p-3 rounded-4 bg-dark bg-opacity-50" style="border: 1px solid rgba(255,255,255,0.04); max-height: 150px; overflow-y: auto;">
+                                    @foreach (var category in categories)
+                                    {
+                                        bool isSelected = Model.Categories != null && Model.Categories.Any(c => c.Id == category.Id);
+                                        <div class="col-md-4 col-sm-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="CategoryIds" value="@category.Id" id="cat_@category.Id" @(isSelected ? "checked" : "") @(isApproved ? "" : "disabled") />
+                                                <label class="form-check-label small text-light" for="cat_@category.Id">
+                                                    @category.Name
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label small text-secondary fw-bold">توضیحات و معرفی شرکت</label>
+                                <textarea name="Description" class="form-control bg-dark text-white border-0 py-2 rounded-3 shadow-none neon-input" rows="4" placeholder="درباره شرکت خود بنویسید..." @(isApproved ? "" : "disabled")>@Model.Description</textarea>
+                            </div>
+                        </div>
+
+                        @if (isApproved)
+                        {
+                            <div class="mt-5 pt-3 border-top border-secondary border-opacity-25 text-end">
+                                <button type="submit" class="btn btn-primary px-5 rounded-3 fw-bold py-3 shadow-lg bg-gradient border-0" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);">
+                                    ذخیره تغییرات شرکت 🏢
+                                </button>
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-nav {
+        transition: all 0.25s ease-in-out;
+    }
+    .hover-glass:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        transform: scale(1.02);
+    }
+    .neon-input:focus {
+        background: rgba(15, 23, 42, 0.95) !important;
+        border: 1px solid #f97316 !important;
+        box-shadow: 0 0 15px rgba(249, 115, 22, 0.25) !important;
+        color: #fff !important;
+    }
+</style>
