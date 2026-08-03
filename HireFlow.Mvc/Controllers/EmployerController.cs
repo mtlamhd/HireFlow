@@ -460,10 +460,10 @@ namespace HireFlow.Mvc.Controllers
                 {
                     Title = model.Title,
                     Description = model.Description,
-                    CityId = model.CityId,
-                    CategoryId = model.CategoryId,
+                    CityId = model.CityId.Value,                  // 👈 اضافه کردن .Value
+                    CategoryId = model.CategoryId.Value,          // 👈 اضافه کردن .Value
                     Salary = model.Salary,
-                    EmploymentType = model.EmploymentType,
+                    EmploymentType = model.EmploymentType.Value,  // 👈 اضافه کردن .Value
                     SkillIds = model.SkillIds
                 };
 
@@ -541,10 +541,10 @@ namespace HireFlow.Mvc.Controllers
                 {
                     Title = model.Title,
                     Description = model.Description,
-                    CityId = model.CityId,
-                    CategoryId = model.CategoryId,
+                    CityId = model.CityId.Value,                  // 👈 اضافه کردن .Value
+                    CategoryId = model.CategoryId.Value,          // 👈 اضافه کردن .Value
                     Salary = model.Salary,
-                    EmploymentType = model.EmploymentType,
+                    EmploymentType = model.EmploymentType.Value,  // 👈 اضافه کردن .Value
                     SkillIds = model.SkillIds
                 };
 

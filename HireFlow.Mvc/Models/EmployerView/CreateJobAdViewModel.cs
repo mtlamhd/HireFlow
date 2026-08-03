@@ -14,17 +14,16 @@ public class CreateJobAdViewModel
     public string Description { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "انتخاب شهر محل کار الزامی است.")]
-    public Guid CityId { get; set; }
+    public Guid? CityId { get; set; } // 👈 اینجا علامت سوال اضافه کن
 
     [Required(ErrorMessage = "انتخاب دسته‌بندی شغلی الزامی است.")]
-    public Guid CategoryId { get; set; }
+    public Guid? CategoryId { get; set; } // 👈 اینجا علامت سوال اضافه کن
 
     [Range(0, double.MaxValue, ErrorMessage = "حقوق و دستمزد باید یک عدد مثبت باشد.")]
     public decimal? Salary { get; set; }
 
     [Required(ErrorMessage = "انتخاب نوع همکاری الزامی است.")]
-    public EmploymentTypeEnum EmploymentType { get; set; }
+    public EmploymentTypeEnum? EmploymentType { get; set; } // 👈 اینجا علامت سوال اضافه کن
 
- 
     public List<Guid> SkillIds { get; set; } = new();
 }

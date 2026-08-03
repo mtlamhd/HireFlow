@@ -89,7 +89,11 @@
 
                             <!-- عنوان شغل -->
                             <h4 class="fw-bold text-white mb-2 text-truncate" title="@req.JobAdTitle">@req.JobAdTitle</h4>
-                            <p class="text-secondary small font-monospace mb-4">تاریخ ارسال: @req.CreatedAt.ToShortDateString()</p>
+                            
+                            <!-- تاریخ ارسال اصلاح‌شده و خوانا -->
+                            <p class="small mb-4 text-light text-opacity-75 d-flex align-items-center gap-1">
+                                <span>📅</span> <span>تاریخ ارسال: @req.CreatedAt.ToString("yyyy/MM/dd")</span>
+                            </p>
 
                             <!-- دکمه‌های پایین کارت -->
                             <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 d-flex gap-2">

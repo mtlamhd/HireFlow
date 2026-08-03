@@ -1,0 +1,180 @@
+
+@model List<HireFlow.Domain.Dtos.JobAdDto.JobAdSummaryDto>
+@{
+    ViewData["Title"] = "آگهی‌های استخدامی من";
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container">
+        
+        <!-- هدر -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(249, 115, 22, 0.15); color: #fb923c;">💼 فرصت‌های شغلی</span>
+                <h1 class="fw-bold text-white mb-0">مدیریت آگهی‌های استخدام شرکت</h1>
+            </div>
+            <a asp-action="CreateJobAd" class="btn btn-primary px-4 py-2 rounded-pill fw-bold shadow-lg border-0" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);">
+                + ثبت آگهی جدید 🚀
+            </a>
+        </div>
+
+        <!-- پیام‌ها -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
+                ✨ @TempData["Message"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            
+            <!-- سایدبار ناوبری -->
+            <div class="col-lg-3">
+                <div class="card border-0 shadow-lg rounded-4 p-3" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div class="list-group list-group-flush gap-2 border-0">
+                        <a asp-controller="Employer" asp-action="Profile" class="list-group-item list-group-item-action rounded-3 border-0 py-3 px-4 d-flex align-items-center justify-content-between text-white transition-nav hover-glass" style="background: rgba(255,255,255,0.02);">
+                            <span>👤 مشخصات فردی کارفرما</span>
+                            <span class="text-secondary">←</span>
+                        </a>
+                        <a asp-controller="Employer" asp-action="Company" class="list-group-item list-group-item-action rounded-3 border-0 py-3 px-4 d-flex align-items-center justify-content-between text-white transition-nav hover-glass" style="background: rgba(255,255,255,0.02);">
+                            <span>🏢 اطلاعات رسمی شرکت</span>
+                            <span class="text-secondary">←</span>
+                        </a>
+                        <a asp-controller="Employer" asp-action="JobAds" class="list-group-item list-group-item-action rounded-3 border-0 py-3 px-4 d-flex align-items-center justify-content-between transition-nav" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white !important;">
+                            <span>💼 آگهی‌های استخدامی من</span>
+                            <span>←</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- محتوای اصلی: لیست آگهی‌ها -->
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h4 class="fw-bold text-white mb-4">لیست فرصت‌های شغلی ثبت‌شده</h4>
+
+                    @if (Model == null || !Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <div class="display-4 mb-3">📭</div>
+                            <h5 class="text-white fw-bold">هنوز هیچ آگهی استخدامی ثبت نکرده‌اید.</h5>
+                            <p class="text-light text-opacity-75 small mb-4">با انتشار اولین فرصت شغلی، بهترین متخصصان را جذب کنید!</p>
+                            <a asp-action="CreateJobAd" class="btn btn-primary px-4 py-2 rounded-3 fw-bold border-0" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);">
+                                ثبت اولین آگهی استخدام 🚀
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                                <thead>
+                                    <tr class="text-secondary border-bottom border-secondary border-opacity-25 small">
+                                        <th class="py-3">عنوان شغلی</th>
+                                        <th class="py-3">شهر / دسته‌بندی</th>
+                                        <th class="py-3">نوع همکاری</th>
+                                        <th class="py-3">وضعیت</th>
+                                        <th class="py-3">درخواست‌ها</th>
+                                        <th class="py-3 text-end">عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ad in Model)
+                                    {
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                                            <td class="py-3 fw-bold text-white">
+                                                @ad.Title
+                                                <div class="small text-light text-opacity-50 fw-normal mt-1">📅 انقضا: @ad.ExpireAt.ToString("yyyy/MM/dd")</div>
+                                            </td>
+                                            <td class="py-3 small text-secondary">
+                                                <div>📍 @ad.CityName</div>
+                                                <div>🏷️ @ad.CategoryName</div>
+                                            </td>
+                                            <td class="py-3 small">
+                                                <span class="badge bg-secondary bg-opacity-25 text-light px-2.5 py-1.5 rounded-pill">@ad.EmploymentType</span>
+                                            </td>
+                                            
+                                            <!-- وضعیت فعال / غیرفعال با استایل نئونی روشن و خوانا -->
+                                            <td class="py-3">
+                                                @if (ad.IsActive)
+                                                {
+                                                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                                                        🟢 فعال
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                                        🔴 غیرفعال
+                                                    </span>
+                                                }
+                                            </td>
+
+                                            <!-- تعداد درخواست‌ها با استایل روشن و خوانا -->
+                                            <td class="py-3">
+                                                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">
+                                                    👥 @ad.ApplicationsCount درخواست
+                                                </span>
+                                            </td>
+
+                                            <td class="py-3 text-end">
+                                                <div class="d-flex gap-2 justify-content-end">
+                                                    <!-- دکمه ویرایش -->
+                                                    <a asp-action="EditJobAd" asp-route-id="@ad.Id" class="btn btn-sm btn-outline-warning rounded-3 px-3" title="ویرایش">
+                                                        ✏️
+                                                    </a>
+
+                                                    <!-- دکمه فعال/غیرفعال‌سازی -->
+                                                    <form asp-action="ToggleActive" asp-route-id="@ad.Id" method="post" class="d-inline">
+                                                        @if (ad.IsActive)
+                                                        {
+                                                            <button type="submit" class="btn btn-sm btn-outline-secondary rounded-3 px-3" title="غیرفعال‌سازی">
+                                                                ⏸️
+                                                            </button>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button type="submit" class="btn btn-sm btn-outline-success rounded-3 px-3" title="فعال‌سازی">
+                                                                ▶️
+                                                            </button>
+                                                        }
+                                                    </form>
+
+                                                    <!-- دکمه حذف نرم‌افزاری -->
+                                                    <form asp-action="DeleteJobAd" asp-route-id="@ad.Id" method="post" class="d-inline" onsubmit="return confirm('آیا از حذف این آگهی اطمینان دارید؟');">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-3 px-3" title="حذف">
+                                                            🗑️
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-nav {
+        transition: all 0.25s ease-in-out;
+    }
+    .hover-glass:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        transform: scale(1.02);
+    }
+</style>
