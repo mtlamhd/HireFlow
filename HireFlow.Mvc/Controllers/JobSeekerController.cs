@@ -254,14 +254,21 @@ namespace HireFlow.Mvc.Controllers
             catch (BaseAppException ex)
             {
                 string errorMsg = ex.Message;
+        
                 if (errorMsg.Contains("resume", StringComparison.OrdinalIgnoreCase))
                 {
                     errorMsg = "⚠️ برای ارسال درخواست، ابتدا باید رزومه PDF خود را در پنل کاربری آپلود کنید!";
+                }
+                // 👇 اضافه شدن ترجمه خطای غیرفعال بودن حساب کاربری
+                else if (errorMsg.Contains("deactivated", StringComparison.OrdinalIgnoreCase) || errorMsg.Contains("deactivate", StringComparison.OrdinalIgnoreCase))
+                {
+                    errorMsg = "⚠️ حساب کاربری شما توسط ادمین غیرفعال شده است. امکان ارسال درخواست همکاری وجود ندارد.";
                 }
                 else if (ex is ConflictException || errorMsg.Contains("already submitted", StringComparison.OrdinalIgnoreCase))
                 {
                     errorMsg = "⚠️ شما قبلاً برای این فرصت شغلی درخواست ارسال کرده‌اید!";
                 }
+        
                 TempData["Error"] = errorMsg;
             }
             catch (Exception)

@@ -121,4 +121,65 @@ namespace HireFlow.Mvc.Controllers;
                 return RedirectToAction("Index", "Home");
             }
         }
+        [HttpGet]
+        public async Task<IActionResult> JobSeekers()
+        {
+            try
+            {
+                var jobSeekers = await _adminService.GetAllJobSeekersAsync();
+                return View(jobSeekers);
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Dashboard));
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> JobSeekerDetails(Guid id)
+        {
+            try
+            {
+                var details = await _adminService.GetJobSeekerDetailsAsync(id);
+                return View(details);
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(JobSeekers));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ActivateJobSeeker(Guid id)
+        {
+            try
+            {
+                var adminId = GetCurrentAdminId();
+                await _adminService.ActivateJobSeekerAsync(id, adminId);
+                TempData["Message"] = "حساب کاربری کارجو با موفقیت فعال شد. 🟢";
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(JobSeekers));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeactivateJobSeeker(Guid id)
+        {
+            try
+            {
+                var adminId = GetCurrentAdminId();
+                await _adminService.DeactivateJobSeekerAsync(id, adminId);
+                TempData["Message"] = "حساب کاربری کارجو غیرفعال شد. 🔴";
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(JobSeekers));
+        }
     }

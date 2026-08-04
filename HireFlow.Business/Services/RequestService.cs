@@ -171,6 +171,10 @@ public class RequestService : IRequestService
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
                 throw new ItemNotFoundException("User", userId);
+            if (!user.IsActive)
+            {
+                throw new InvalidRequestException("Your account has been deactivated by the admin.");
+            }
 
             if (!user.ResumeId.HasValue || user.ResumeId.Value == Guid.Empty)
             {
