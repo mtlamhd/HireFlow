@@ -1,0 +1,159 @@
+@model HireFlow.Domain.Dtos.AdminDto.AdminDashboardStatsDto
+@{
+    ViewData["Title"] = "داشبورد مدیریت کل";
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container">
+        
+        <!-- هدر داشبورد -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">👑 پنل مدیریت کل سیستم</span>
+                <h1 class="fw-bold text-white mb-0">داشبورد آماری و وضعیت کلی پلتفرم</h1>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="Employers" class="btn btn-primary rounded-pill px-4 py-2 shadow bg-gradient border-0 fw-bold" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                    🏢 مدیریت کارفرمایان
+                </a>
+            </div>
+        </div>
+
+        <!-- پیام‌ها -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
+                ✨ @TempData["Message"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- بخش اول: آمار کاربران -->
+        <h4 class="fw-bold text-white mb-3">👥 آمار کاربران سیستم</h4>
+        <div class="row g-4 mb-5">
+            
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg rounded-4 p-4 d-flex flex-row align-items-center justify-content-between" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div>
+                        <span class="text-secondary small d-block mb-1">کل کارجویان ثبت‌نامی</span>
+                        <h2 class="fw-bold text-white mb-0">@Model.TotalJobSeekers</h2>
+                    </div>
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; font-size: 24px; width: 60px; height: 60px;">
+                        🎯
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg rounded-4 p-4 d-flex flex-row align-items-center justify-content-between" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div>
+                        <span class="text-secondary small d-block mb-1">کل کارفرمایان ثبت‌نامی</span>
+                        <h2 class="fw-bold text-white mb-0">@Model.TotalEmployers</h2>
+                    </div>
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(249, 115, 22, 0.15); color: #fb923c; font-size: 24px; width: 60px; height: 60px;">
+                        🏢
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg rounded-4 p-4 d-flex flex-row align-items-center justify-content-between" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div>
+                        <span class="text-secondary small d-block mb-1">کارفرمایان در انتظار تأیید</span>
+                        <h2 class="fw-bold text-warning mb-0">@Model.TotalPendingEmployers</h2>
+                    </div>
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 24px; width: 60px; height: 60px;">
+                        ⏳
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- بخش دوم: آمار آگهی‌های استخدام -->
+        <h4 class="fw-bold text-white mb-3">💼 وضعیت آگهی‌های شغلی</h4>
+        <div class="row g-4 mb-5">
+            
+            <div class="col-md-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 d-flex flex-row align-items-center justify-content-between" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div>
+                        <span class="text-secondary small d-block mb-1">آگهی‌های فعال و در حال نمایش</span>
+                        <h2 class="fw-bold text-success mb-0">@Model.TotalActiveJobAds</h2>
+                    </div>
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 24px; width: 60px; height: 60px;">
+                        🟢
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 d-flex flex-row align-items-center justify-content-between" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <div>
+                        <span class="text-secondary small d-block mb-1">آگهی‌های غیرفعال یا منقضی</span>
+                        <h2 class="fw-bold text-danger mb-0">@Model.TotalInactiveJobAds</h2>
+                    </div>
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(239, 68, 68, 0.15); color: #f87171; font-size: 24px; width: 60px; height: 60px;">
+                        🔴
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- بخش سوم: آمار درخواست‌های همکاری (به تفکیک ماشین حالت) -->
+        <h4 class="fw-bold text-white mb-3">📊 وضعیت درخواست‌های همکاری (ماشین حالت)</h4>
+        <div class="row g-4">
+            
+            <div class="col-md-4 col-sm-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <span class="text-secondary small d-block mb-2">⏳ در انتظار بررسی (Initial)</span>
+                    <h3 class="fw-bold text-info mb-0">@Model.InitialRequestsCount</h3>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <span class="text-secondary small d-block mb-2">👁️ در حال بررسی کارفرما</span>
+                    <h3 class="fw-bold text-warning mb-0">@Model.UnderReviewRequestsCount</h3>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <span class="text-secondary small d-block mb-2">🤝 دعوت به مصاحبه</span>
+                    <h3 class="fw-bold text-primary mb-0" style="color: #818cf8 !important;">@Model.InterviewRequestsCount</h3>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <span class="text-secondary small d-block mb-2">🎉 پذیرفته شده (Accepted)</span>
+                    <h3 class="fw-bold text-success mb-0">@Model.AcceptedRequestsCount</h3>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <span class="text-secondary small d-block mb-2">❌ رد شده (Rejected)</span>
+                    <h3 class="fw-bold text-danger mb-0">@Model.RejectedRequestsCount</h3>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <span class="text-secondary small d-block mb-2">🚫 لغو شده (Cancelled)</span>
+                    <h3 class="fw-bold text-secondary mb-0">@Model.CancelledRequestsCount</h3>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

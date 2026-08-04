@@ -1,0 +1,122 @@
+@model List<HireFlow.Domain.Dtos.AdminDto.AdminEmployerSummaryDto>
+@{
+    ViewData["Title"] = "مدیریت کارفرمایان";
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container">
+        
+        <!-- هدر -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">👑 پنل مدیریت ادمین</span>
+                <h1 class="fw-bold text-white mb-0">مدیریت و تأیید کارفرمایان</h1>
+            </div>
+            <a asp-action="Dashboard" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">← بازگشت به داشبورد</a>
+        </div>
+
+        <!-- پیام‌ها -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
+                ✨ @TempData["Message"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+            <h4 class="fw-bold text-white mb-4">لیست تمامی کارفرمایان پلتفرم</h4>
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-center py-5">
+                    <div class="display-4 mb-3">📭</div>
+                    <h5 class="text-white fw-bold">هنوز هیچ کارفرمایی در سیستم ثبت‌نام نکرده است.</h5>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                        <thead>
+                            <tr class="text-secondary border-bottom border-secondary border-opacity-25 small">
+                                <th class="py-3">نام کارفرما / موبایل</th>
+                                <th class="py-3">نام شرکت</th>
+                                <th class="py-3">وضعیت تأیید صلاحیت</th>
+                                <th class="py-3">تاریخ ثبت‌نام</th>
+                                <th class="py-3 text-end">عملیات ادمین</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var emp in Model)
+                            {
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                                    <td class="py-3 fw-bold text-white">
+                                        👤 @(string.IsNullOrEmpty(emp.FullName) ? emp.Username : emp.FullName)
+                                        <div class="small text-secondary fw-normal">📞 @emp.Username</div>
+                                    </td>
+                                    <td class="py-3 text-light">
+                                        🏢 @emp.CompanyName
+                                    </td>
+                                    <td class="py-3">
+                                        @if (emp.IsApproved)
+                                        {
+                                            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                                                ✅ تأیید شده
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">
+                                                ⏳ در انتظار تأیید
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="py-3 small text-light text-opacity-75">
+                                        📅 @emp.CreatedAt.ToString("yyyy/MM/dd")
+                                    </td>
+                                    <td class="py-3 text-end">
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            
+                                            <!-- دکمه جزئیات -->
+                                            <a asp-action="EmployerDetails" asp-route-userId="@emp.UserId" class="btn btn-sm btn-outline-info rounded-3 px-3" title="مشاهده جزئیات">
+                                                👁️ جزئیات
+                                            </a>
+
+                                            <!-- دکمه تأیید یا رد -->
+                                            @if (!emp.IsApproved)
+                                            {
+                                                <form asp-action="ApproveEmployer" asp-route-userId="@emp.UserId" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-success rounded-3 px-3 fw-bold" title="تأیید حساب کارفرما">
+                                                        ✓ تأیید
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-action="DisapproveEmployer" asp-route-userId="@emp.UserId" method="post" class="d-inline" onsubmit="return confirm('آیا از لغو تأیید این کارفرما اطمینان دارید؟');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-3 px-3 fw-bold" title="لغو تأیید">
+                                                        ✕ رد صلاحیت
+                                                    </button>
+                                                </form>
+                                            }
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>

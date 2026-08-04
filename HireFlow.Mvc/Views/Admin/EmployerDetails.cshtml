@@ -1,0 +1,171 @@
+@model HireFlow.Domain.Dtos.AdminDto.AdminEmployerDetailsDto
+@{
+    ViewData["Title"] = "جزئیات کارفرما و شرکت";
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container" style="max-width: 900px;">
+        
+        <!-- هدر -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">👑 پرونده کارفرما</span>
+                <h1 class="fw-bold text-white mb-0">جزئیات حساب کاربری و شرکت</h1>
+            </div>
+            <a asp-action="Employers" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">← بازگشت به لیست کارفرمایان</a>
+        </div>
+
+        <!-- پیام‌ها -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
+                ✨ @TempData["Message"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 mb-4" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+            
+            <!-- اطلاعات هویتی کارفرما -->
+            <div class="d-flex justify-content-between align-items-center pb-4 mb-4 border-bottom border-secondary border-opacity-25">
+                <div>
+                    <h3 class="fw-bold text-white mb-1">👤 @(string.IsNullOrEmpty(Model.FullName) ? Model.Username : Model.FullName)</h3>
+                    <p class="text-secondary mb-0">شماره موبایل / نام کاربری: <span class="font-monospace text-light">@Model.Username</span></p>
+                </div>
+                <div>
+                    @if (Model.IsApproved)
+                    {
+                        <span class="badge rounded-pill px-4 py-2 fs-6 fw-bold" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                            ✅ حساب تأیید شده
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge rounded-pill px-4 py-2 fs-6 fw-bold" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">
+                            ⏳ در انتظار تأیید ادمین
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10">
+                        <span class="text-secondary small d-block mb-1">ایمیل شخصی</span>
+                        <span class="fw-bold text-white">@(string.IsNullOrEmpty(Model.Email) ? "ثبت نشده" : Model.Email)</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10">
+                        <span class="text-secondary small d-block mb-1">کد ملی</span>
+                        <span class="fw-bold text-white @(string.IsNullOrEmpty(Model.NationalId) ? "" : "font-monospace")">
+                            @(string.IsNullOrEmpty(Model.NationalId) ? "ثبت نشده" : Model.NationalId)
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10">
+                        <span class="text-secondary small d-block mb-1">تاریخ ثبت‌نام در پلتفرم</span>
+                        <span class="fw-bold text-white">@Model.CreatedAt.ToString("yyyy/MM/dd")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- اطلاعات شرکت مرتبط با کارفرما -->
+            <div class="p-4 rounded-4 mb-4" style="background: rgba(249, 115, 22, 0.05); border: 1px solid rgba(249, 115, 22, 0.2);">
+                <div class="d-flex align-items-center gap-4 mb-4">
+                    @if (Model.CompanyLogoId.HasValue && Model.CompanyLogoId.Value != Guid.Empty)
+                    {
+                        // 👇 اینجا کلمه "Employer" رو باید بکنی "Admin"
+                        <img src="@Url.Action("GetAttachment", "Admin", new { id = Model.CompanyLogoId })" class="rounded-4 shadow-lg" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid rgba(249, 115, 22, 0.5);" alt="Company Logo" />
+                    }
+                    else
+                    {
+                        <div class="rounded-4 d-flex align-items-center justify-content-center fw-bold text-white shadow-lg" style="width: 80px; height: 80px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); font-size: 28px;">
+                            🏢
+                        </div>
+                    }
+                    <div>
+                        <h4 class="fw-bold text-white mb-1">@Model.CompanyName</h4>
+                        <p class="text-secondary small mb-0">📍 موقعیت: @(Model.ProvinceName ?? "استان نامشخص")، @(Model.CityName ?? "شهر نامشخص") | 💼 تعداد آگهی‌ها: @Model.JobAdsCount</p>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <span class="text-secondary small d-block mb-1">تلفن شرکت</span>
+                        <span class="text-white fw-bold @(string.IsNullOrEmpty(Model.CompanyPhone) ? "" : "font-monospace")">
+                            @(string.IsNullOrEmpty(Model.CompanyPhone) ? "ثبت نشده" : Model.CompanyPhone)
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-secondary small d-block mb-1">ایمیل شرکت</span>
+                        <span class="text-white fw-bold">@(string.IsNullOrEmpty(Model.CompanyEmail) ? "ثبت نشده" : Model.CompanyEmail)</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-secondary small d-block mb-1">وب‌سایت رسمی</span>
+                        @if (!string.IsNullOrEmpty(Model.CompanyWebsite))
+                        {
+                            <a href="@Model.CompanyWebsite" target="_blank" class="text-info text-decoration-none fw-bold">@Model.CompanyWebsite ↗</a>
+                        }
+                        else
+                        {
+                            <span class="text-white fw-bold">ثبت نشده</span>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-secondary small d-block mb-1">آدرس فیزیکی دفتر</span>
+                        <span class="text-white fw-bold">@(string.IsNullOrEmpty(Model.CompanyAddress) ? "ثبت نشده" : Model.CompanyAddress)</span>
+                    </div>
+                    <div class="col-md-12">
+                        <span class="text-secondary small d-block mb-1">درباره شرکت</span>
+                        <p class="text-light text-opacity-75 small mb-0">@(string.IsNullOrEmpty(Model.CompanyDescription) ? "توضیحاتی ثبت نشده است." : Model.CompanyDescription)</p>
+                    </div>
+                </div>
+
+                <!-- دسته‌بندی‌های شرکت -->
+                @if (Model.CompanyCategories != null && Model.CompanyCategories.Any())
+                {
+                    <div class="pt-3 border-top border-secondary border-opacity-25">
+                        <span class="text-secondary small d-block mb-2">حوزه‌های فعالیت شرکت:</span>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var cat in Model.CompanyCategories)
+                            {
+                                <span class="badge bg-secondary bg-opacity-25 text-light px-3 py-1.5 rounded-pill">🏷️ @cat.Name</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- دکمه‌های عملیاتی ادمین (تأیید / رد) -->
+            <div class="border-top border-secondary border-opacity-25 pt-4 d-flex justify-content-end gap-3">
+                @if (!Model.IsApproved)
+                {
+                    <form asp-action="ApproveEmployer" asp-route-userId="@Model.UserId" method="post">
+                        <button type="submit" class="btn btn-success fw-bold px-5 py-3 rounded-3 shadow-lg">
+                            ✓ تأیید صلاحیت کارفرما و ارسال ایمیل
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-action="DisapproveEmployer" asp-route-userId="@Model.UserId" method="post" onsubmit="return confirm('آیا از لغو تأیید این کارفرما اطمینان دارید؟');">
+                        <button type="submit" class="btn btn-outline-danger fw-bold px-5 py-3 rounded-3 shadow-sm">
+                            ✕ لغو تأیید (رد صلاحیت)
+                        </button>
+                    </form>
+                }
+            </div>
+
+        </div>
+
+    </div>
+</div>

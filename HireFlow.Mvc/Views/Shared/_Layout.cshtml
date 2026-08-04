@@ -54,7 +54,8 @@
                             <ul class="dropdown-menu dropdown-menu-dark shadow-lg rounded-4 border-0 mt-2 p-2" style="background: #1e293b;">
                                 @if (roles.Contains("Admin"))
                                 {
-                                    <li><a class="dropdown-item rounded-3 py-2" href="#">👑 پنل ادمین</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="Employers">👑 مدیریت کارفرمایان</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="Dashboard">📊 داشبورد ادمین</a></li>
                                 }
                                 else if (roles.Contains("Employer"))
                                 {
