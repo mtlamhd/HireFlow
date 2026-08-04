@@ -1,4 +1,3 @@
-
 @model List<HireFlow.Domain.Dtos.JobAdDto.JobAdSummaryDto>
 @{
     ViewData["Title"] = "آگهی‌های استخدامی من";
@@ -102,7 +101,7 @@
                                                 <span class="badge bg-secondary bg-opacity-25 text-light px-2.5 py-1.5 rounded-pill">@ad.EmploymentType</span>
                                             </td>
                                             
-                                            <!-- وضعیت فعال / غیرفعال با استایل نئونی روشن و خوانا -->
+                                            <!-- وضعیت فعال / غیرفعال -->
                                             <td class="py-3">
                                                 @if (ad.IsActive)
                                                 {
@@ -118,11 +117,11 @@
                                                 }
                                             </td>
 
-                                            <!-- تعداد درخواست‌ها با استایل روشن و خوانا -->
+                                            <!-- تعداد درخواست‌ها (دکمه قابل کلیک برای مشاهده متقاضیان) -->
                                             <td class="py-3">
-                                                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">
-                                                    👥 @ad.ApplicationsCount درخواست
-                                                </span>
+                                                <a asp-action="Requests" asp-route-jobAdId="@ad.Id" class="badge rounded-pill px-3 py-2 fw-bold text-decoration-none shadow-sm transition-badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">
+                                                    👥 @ad.ApplicationsCount درخواست (مشاهده) 🔍
+                                                </a>
                                             </td>
 
                                             <td class="py-3 text-end">
@@ -176,5 +175,13 @@
     .hover-glass:hover {
         background: rgba(255, 255, 255, 0.08) !important;
         transform: scale(1.02);
+    }
+    .transition-badge {
+        transition: all 0.2s ease-in-out;
+    }
+    .transition-badge:hover {
+        background: rgba(59, 130, 246, 0.3) !important;
+        color: #fff !important;
+        transform: translateY(-2px);
     }
 </style>

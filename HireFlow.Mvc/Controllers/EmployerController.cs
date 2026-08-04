@@ -4,6 +4,7 @@ using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.AttachmentDto;
 using HireFlow.Domain.Dtos.CompanyDto;
 using HireFlow.Domain.Dtos.JobAdDto;
+using HireFlow.Domain.Dtos.RequestDto;
 using HireFlow.Domain.Dtos.UserDto;
 using HireFlow.Domain.Entities;
 using HireFlow.Domain.Enums;
@@ -24,6 +25,7 @@ namespace HireFlow.Mvc.Controllers
         private readonly ICompanyService _companyService;
         private readonly IJobAdService _jobAdService;
         private readonly UserManager<User> _userManager;
+        private readonly IRequestService _requestService;
 
         public EmployerController(
             IEmployerProfileService employerProfileService,
@@ -31,7 +33,7 @@ namespace HireFlow.Mvc.Controllers
             IUnitOfWork unitOfWork, 
             UserManager<User> userManager, 
             ICompanyService companyService,
-            IJobAdService jobAdService)
+            IJobAdService jobAdService, IRequestService requestService)
         {
             _employerProfileService = employerProfileService;
             _attachmentService = attachmentService;
@@ -39,6 +41,7 @@ namespace HireFlow.Mvc.Controllers
             _userManager = userManager;
             _companyService = companyService;
             _jobAdService = jobAdService;
+            _requestService = requestService;
         }
 
         // واکشی امن شناسه کاربر لاگین شده از Claim ها
@@ -594,6 +597,85 @@ namespace HireFlow.Mvc.Controllers
                 return NotFound();
 
             return File(attachment.Data, attachment.ContentType);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Requests(Guid jobAdId)
+        {
+            var userId = GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null || !user.IsApproved)
+            {
+                TempData["Error"] = "⚠️ حساب کاربری شما هنوز تایید صلاحیت نشده است.";
+                return RedirectToAction(nameof(Company));
+            }
+
+            try
+            {
+                var requests = await _requestService.GetJobAdRequestsAsync(userId, jobAdId);
+                ViewBag.JobAdId = jobAdId; // برای بازگشت به صفحه قبلی
+                return View(requests);
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(JobAds));
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> RequestDetails(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null || !user.IsApproved)
+            {
+                TempData["Error"] = "⚠️ حساب کاربری شما هنوز تایید صلاحیت نشده است.";
+                return RedirectToAction(nameof(Company));
+            }
+
+            try
+            {
+                var requestDetails = await _requestService.GetRequestDetailsAsync(userId, id);
+                return View(requestDetails);
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(JobAds));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeStatus(Guid requestId, Guid jobAdId, RequestStatusEnum newStatus)
+        {
+            var userId = GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null || !user.IsApproved)
+            {
+                TempData["Error"] = "⚠️ حساب کاربری شما هنوز تایید صلاحیت نشده است.";
+                return RedirectToAction(nameof(Company));
+            }
+
+            try
+            {
+                var changeDto = new ChangeRequestStatusDto { NewStatus = newStatus };
+                await _requestService.ChangeRequestStatusAsync(userId, requestId, changeDto);
+                
+                TempData["Message"] = "وضعیت درخواست همکاری با موفقیت به‌روزرسانی شد و ایمیل اطلاع‌رسانی برای کارجو ارسال گردید. ✉️";
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "خطایی در تغییر وضعیت درخواست رخ داد.";
+            }
+
+            // بازگشت به صفحه جزئیات درخواست یا لیست درخواست‌های آن آگهی
+            return RedirectToAction(nameof(RequestDetails), new { id = requestId });
         }
     }
 }

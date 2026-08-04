@@ -1,0 +1,185 @@
+@using HireFlow.Domain.Dtos.RequestDto
+@using HireFlow.Domain.Enums
+@model RequestViewDto
+@{
+    ViewData["Title"] = "جزئیات درخواست متقاضی";
+
+    // متد کمکی برای ترجمه وضعیت‌های درخواست به فارسی روان
+    string GetPersianStatus(RequestStatusEnum status) => status switch
+    {
+        RequestStatusEnum.Initial => "در انتظار بررسی",
+        RequestStatusEnum.UnderReview => "در حال بررسی",
+        RequestStatusEnum.Interview => "دعوت به مصاحبه",
+        RequestStatusEnum.Accepted => "پذیرفته شده",
+        RequestStatusEnum.Rejected => "رد شده",
+        RequestStatusEnum.Cancelled => "لغو شده توسط کارجو",
+        _ => status.ToString()
+    };
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container" style="max-width: 900px;">
+        
+        <!-- هدر -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(249, 115, 22, 0.15); color: #fb923c;">📄 پرونده متقاضی</span>
+                <h1 class="fw-bold text-white mb-0">مشخصات و بررسی درخواست</h1>
+            </div>
+            <a asp-action="JobAds" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">← بازگشت به آگهی‌ها</a>
+        </div>
+
+        <!-- پیام‌ها -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
+                ✨ @TempData["Message"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 mb-4" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+            
+            <div class="row g-4 align-items-center pb-4 mb-4 border-bottom border-secondary border-opacity-25">
+                <div class="col-md-8">
+                    <h2 class="fw-bold text-white mb-1">@(string.IsNullOrEmpty(Model.FirstName) ? "کاربر بدون نام" : $"{Model.FirstName} {Model.LastName}")</h2>
+                    <p class="text-secondary mb-0">تاریخ ثبت درخواست: @Model.CreatedAt.ToString("yyyy/MM/dd HH:mm")</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <span class="badge rounded-pill px-4 py-2 fs-6 fw-bold" style="background: rgba(249, 115, 22, 0.15); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3);">
+                        وضعیت: @GetPersianStatus(Model.Status)
+                    </span>
+                </div>
+            </div>
+
+            <!-- اطلاعات فردی کارجو -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10">
+                        <span class="text-secondary small d-block mb-1">ایمیل تماس</span>
+                        <span class="fw-bold text-white">@(string.IsNullOrEmpty(Model.Email) ? "ثبت نشده" : Model.Email)</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10">
+                        <span class="text-secondary small d-block mb-1">شماره موبایل</span>
+                        <span class="fw-bold text-white font-monospace">@Model.PhoneNumber</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10">
+                        <span class="text-secondary small d-block mb-1">کد ملی</span>
+                        <span class="fw-bold text-white font-monospace">@(string.IsNullOrEmpty(Model.NationalId) ? "ثبت نشده" : Model.NationalId)</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10">
+                        <span class="text-secondary small d-block mb-1">سن</span>
+                        <span class="fw-bold text-white">@(Model.Age.HasValue ? $"{Model.Age.Value} ساله" : "ثبت نشده")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بخش دانلود رزومه PDF کارجو -->
+            <div class="p-4 rounded-4 mb-5" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-white mb-1">📄 رزومه شغلی متقاضی (PDF)</h5>
+                        <p class="text-secondary small mb-0">نام فایل: @(string.IsNullOrEmpty(Model.ResumeFileName) ? "Resume.pdf" : Model.ResumeFileName)</p>
+                    </div>
+                    @if (Model.ResumeId != Guid.Empty)
+                    {
+                        <a asp-action="GetAttachment" asp-route-id="@Model.ResumeId" target="_blank" class="btn btn-primary rounded-3 px-4 py-2 fw-bold shadow-sm bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                            دانلود / مشاهده رزومه 📥
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger bg-opacity-20 text-danger px-3 py-2 rounded-3">کارجو رزومه‌ای بارگذاری نکرده است</span>
+                    }
+                </div>
+            </div>
+
+            <!-- پنل تغییر وضعیت (ماشین حالت دامین) -->
+            <div class="border-top border-secondary border-opacity-25 pt-4">
+                <h5 class="fw-bold text-white mb-3">⚙️ تغییر وضعیت درخواست همکاری</h5>
+                <p class="text-secondary small mb-4">بر اساس روند مصاحبه و بررسی، وضعیت درخواست این متقاضی را به‌روزرسانی کنید:</p>
+
+                <div class="d-flex flex-wrap gap-3">
+                    
+                    <!-- اگر در وضعیت Initial باشد -> انتقال به UnderReview -->
+                    @if (Model.Status == RequestStatusEnum.Initial)
+                    {
+                        <form asp-action="ChangeStatus" method="post">
+                            <input type="hidden" name="requestId" value="@Model.Id" />
+                            <input type="hidden" name="newStatus" value="@RequestStatusEnum.UnderReview" />
+                            <button type="submit" class="btn btn-warning fw-bold px-4 py-2.5 rounded-3 shadow-sm">
+                                👁️ انتقال به "در حال بررسی"
+                            </button>
+                        </form>
+                    }
+
+                    <!-- اگر در وضعیت UnderReview باشد -> انتقال به Interview یا Rejected -->
+                    @if (Model.Status == RequestStatusEnum.UnderReview)
+                    {
+                        <form asp-action="ChangeStatus" method="post">
+                            <input type="hidden" name="requestId" value="@Model.Id" />
+                            <input type="hidden" name="newStatus" value="@RequestStatusEnum.Interview" />
+                            <button type="submit" class="btn btn-info fw-bold px-4 py-2.5 rounded-3 shadow-sm text-white" style="background: #6366f1;">
+                                🤝 دعوت به مصاحبه
+                            </button>
+                        </form>
+
+                        <form asp-action="ChangeStatus" method="post">
+                            <input type="hidden" name="requestId" value="@Model.Id" />
+                            <input type="hidden" name="newStatus" value="@RequestStatusEnum.Rejected" />
+                            <button type="submit" class="btn btn-danger fw-bold px-4 py-2.5 rounded-3 shadow-sm">
+                                ❌ رد درخواست
+                            </button>
+                        </form>
+                    }
+
+                    <!-- اگر در وضعیت Interview باشد -> Accept یا Reject -->
+                    @if (Model.Status == RequestStatusEnum.Interview)
+                    {
+                        <form asp-action="ChangeStatus" method="post">
+                            <input type="hidden" name="requestId" value="@Model.Id" />
+                            <input type="hidden" name="newStatus" value="@RequestStatusEnum.Accepted" />
+                            <button type="submit" class="btn btn-success fw-bold px-4 py-2.5 rounded-3 shadow-sm">
+                                🎉 پذیرش نهایی (قبول)
+                            </button>
+                        </form>
+
+                        <form asp-action="ChangeStatus" method="post">
+                            <input type="hidden" name="requestId" value="@Model.Id" />
+                            <input type="hidden" name="newStatus" value="@RequestStatusEnum.Rejected" />
+                            <button type="submit" class="btn btn-danger fw-bold px-4 py-2.5 rounded-3 shadow-sm">
+                                ❌ رد درخواست
+                            </button>
+                        </form>
+                    }
+
+                    @if (Model.Status == RequestStatusEnum.Accepted || Model.Status == RequestStatusEnum.Rejected)
+                    {
+                        <div class="alert alert-secondary bg-dark text-light border-0 w-100 py-3 rounded-3 text-center">
+                            این درخواست به نتیجه نهایی رسیده است (@GetPersianStatus(Model.Status)) و امکان تغییر وضعیت آن وجود ندارد.
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

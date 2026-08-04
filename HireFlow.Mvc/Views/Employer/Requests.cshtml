@@ -1,0 +1,110 @@
+@using HireFlow.Domain.Dtos.RequestDto
+@using HireFlow.Domain.Enums
+@model List<RequestSummaryDto>
+@{
+    ViewData["Title"] = "درخواست‌های دریافتی آگهی";
+    var jobAdId = ViewBag.JobAdId;
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container">
+        
+        <!-- هدر -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(249, 115, 22, 0.15); color: #fb923c;">👥 متقاضیان شغل</span>
+                <h1 class="fw-bold text-white mb-0">لیست درخواست‌های دریافتی</h1>
+            </div>
+            <a asp-action="JobAds" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">← بازگشت به لیست آگهی‌ها</a>
+        </div>
+
+        <!-- پیام‌ها -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
+                ✨ @TempData["Message"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+            
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-center py-5">
+                    <div class="display-4 mb-3">📭</div>
+                    <h5 class="text-white fw-bold">هنوز هیچ درخواستی برای این آگهی ثبت نشده است.</h5>
+                    <p class="text-light text-opacity-75 small">به محض اینکه کارجویی برای این فرصت شغلی درخواست بفرستد، نام او در اینجا نمایش داده خواهد شد.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                        <thead>
+                            <tr class="text-secondary border-bottom border-secondary border-opacity-25 small">
+                                <th class="py-3">نام کارجو</th>
+                                <th class="py-3">شماره تماس</th>
+                                <th class="py-3">تاریخ ارسال</th>
+                                <th class="py-3">وضعیت فعلی</th>
+                                <th class="py-3 text-end">عملیات بررسی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var req in Model)
+                            {
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                                    <td class="py-3 fw-bold text-white">
+                                        👤 @req.JobSeekerName
+                                    </td>
+                                    <td class="py-3 text-secondary font-monospace">
+                                        📞 @req.JobSeekerPhoneNumber
+                                    </td>
+                                    <td class="py-3 small text-light text-opacity-75">
+                                        📅 @req.CreatedAt.ToString("yyyy/MM/dd")
+                                    </td>
+                                    <td class="py-3">
+                                        @switch (req.Status)
+                                        {
+                                            case RequestStatusEnum.Initial:
+                                                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">⏳ در انتظار بررسی</span>
+                                                break;
+                                            case RequestStatusEnum.UnderReview:
+                                                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(250, 204, 21, 0.15); color: #facc15;">👁️ در حال بررسی</span>
+                                                break;
+                                            case RequestStatusEnum.Interview:
+                                                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(129, 140, 248, 0.15); color: #818cf8;">🤝 دعوت به مصاحبه</span>
+                                                break;
+                                            case RequestStatusEnum.Accepted:
+                                                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">🎉 پذیرفته شده</span>
+                                                break;
+                                            case RequestStatusEnum.Rejected:
+                                                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">❌ رد شده</span>
+                                                break;
+                                            case RequestStatusEnum.Cancelled:
+                                                <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background: rgba(100, 116, 139, 0.15); color: #94a3b8;">🚫 لغو شده توسط کارجو</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="py-3 text-end">
+                                        <a asp-action="RequestDetails" asp-route-id="@req.Id" class="btn btn-sm btn-primary rounded-3 px-4 fw-bold shadow-sm" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border: 0;">
+                                            مشاهده رزومه و بررسی 📄
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
