@@ -42,6 +42,12 @@
                 </ul>
 
                 <div class="d-flex align-items-center gap-3">
+                    
+                    <!-- ☀️🌙 دکمه سوییچ تم (تاریک / روشن) -->
+                    <button id="themeToggleBtn" class="btn btn-outline-light rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;" title="تغییر تم (تاریک / روشن)">
+                        🌙
+                    </button>
+
                     @if (SignInManager.IsSignedIn(User))
                     {
                         var currentUser = await UserManager.GetUserAsync(User);
@@ -58,28 +64,18 @@
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="Employers">👑 مدیریت کارفرمایان</a></li>
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="JobSeekers">🎯 مدیریت کارجویان</a></li>
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="JobAds">💼 مدیریت آگهی‌ها</a></li>
-    
-                                    <!-- 👇 این خط را برای مدیریت ایمیل‌ها اضافه کن -->
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="EmailTemplates">✉️ مدیریت قالب‌های ایمیل</a></li>
                                 }
-
                                 else if (roles.Contains("Employer"))
                                 {
-                                    <!-- لینک‌های دوطرفه و همیشه در دسترس برای کارفرما -->
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Employer" asp-action="Profile">👤 مشخصات فردی من</a></li>
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Employer" asp-action="Company">🏢 مدیریت اطلاعات شرکت</a></li>
-                                <li>
-                                    <a class="dropdown-item rounded-3 py-2"
-                                       asp-controller="Employer"
-                                       asp-action="JobAds">
-                                        💼 آگهی‌های استخدامی من
-                                    </a>
-                                </li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Employer" asp-action="JobAds">💼 آگهی‌های استخدامی من</a></li>
                                 }
                                 else
                                 {
-                                <li><a class="dropdown-item rounded-3 py-2" asp-controller="JobSeeker" asp-action="Profile">🎯 ویرایش پروفایل</a></li>
-                                <li><a class="dropdown-item rounded-3 py-2" asp-controller="JobSeeker" asp-action="MyRequests">📋 درخواست‌های من</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="JobSeeker" asp-action="Profile">🎯 ویرایش پروفایل</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="JobSeeker" asp-action="MyRequests">📋 درخواست‌های من</a></li>
                                 }
                                 <li><hr class="dropdown-divider opacity-25"></li>
                                 <li>
@@ -115,11 +111,151 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- اسکریپت و استایل‌های سوییچ تم (دیفالت = دارک مود) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toggleBtn = document.getElementById('themeToggleBtn');
+            const body = document.body;
+
+            const savedTheme = localStorage.getItem('hireflow_theme');
+            if (savedTheme === 'light') {
+                body.classList.add('light-mode');
+                if (toggleBtn) toggleBtn.textContent = '☀️';
+            } else {
+                body.classList.remove('light-mode');
+                if (toggleBtn) toggleBtn.textContent = '🌙';
+                if (!savedTheme) {
+                    localStorage.setItem('hireflow_theme', 'dark');
+                }
+            }
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    body.classList.toggle('light-mode');
+                    if (body.classList.contains('light-mode')) {
+                        localStorage.setItem('hireflow_theme', 'light');
+                        this.textContent = '☀️';
+                    } else {
+                        localStorage.setItem('hireflow_theme', 'dark');
+                        this.textContent = '🌙';
+                    }
+                });
+            }
+        });
+    </script>
+
+    <style>
+        .hover-glass:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* انیمیشن نرم موقع تغییر تم */
+        body, .card, .navbar, .form-control, .form-select, .btn {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+        }
+
+        /* 🌟 استایل‌های حالت روشن (Light Mode) با اصلاح صددرصدی دراپ‌داون‌ها و فیلترها */
+        body.light-mode {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+
+        body.light-mode p,
+        body.light-mode span,
+        body.light-mode h1, body.light-mode h2, body.light-mode h3, body.light-mode h4, body.light-mode h5, body.light-mode h6,
+        body.light-mode label,
+        body.light-mode td,
+        body.light-mode th,
+        body.light-mode .text-secondary,
+        body.light-mode .text-light,
+        body.light-mode .form-text {
+            color: #1e293b !important;
+        }
+
+        body.light-mode [style*="background-color: #0b0f19"],
+        body.light-mode [style*="background: #0b0f19"] {
+            background-color: #f8fafc !important;
+            background: #f8fafc !important;
+        }
+
+        body.light-mode [style*="background: #1e293b"],
+        body.light-mode [style*="background-color: #1e293b"],
+        body.light-mode .card {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05) !important;
+            color: #0f172a !important;
+        }
+
+        /* 🛠️ اصلاح ویژه برای اینپوت‌ها، سلکت‌ها و آپشن‌های فیلتر در حالت روشن */
+        body.light-mode .form-control,
+        body.light-mode .form-select,
+        body.light-mode select,
+        body.light-mode input,
+        body.light-mode textarea,
+        body.light-mode [style*="background: rgba(15, 23, 42"] {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+
+        /* اصلاح رنگ متن گزینه‌های دراپ‌داون (Options) */
+        body.light-mode option {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+        body.light-mode .form-control::placeholder,
+        body.light-mode textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        body.light-mode .navbar {
+            background: rgba(255, 255, 255, 0.85) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-mode .table-dark {
+            --bs-table-bg: #ffffff;
+            --bs-table-color: #0f172a;
+            color: #0f172a;
+            border-color: #e2e8f0;
+        }
+
+        body.light-mode .btn-outline-light {
+            color: #0f172a !important;
+            border-color: #94a3b8 !important;
+            background-color: #ffffff !important;
+        }
+
+        body.light-mode .btn-outline-light:hover {
+            color: #ffffff !important;
+            background-color: #0f172a !important;
+            border-color: #0f172a !important;
+        }
+
+        body.light-mode .dropdown-menu {
+            background-color: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-mode .dropdown-item {
+            color: #0f172a !important;
+        }
+
+        body.light-mode .dropdown-item:hover {
+            background-color: #f1f5f9 !important;
+            color: #4f46e5 !important;
+        }
+
+        body.light-mode .dropdown-divider {
+            border-color: #e2e8f0 !important;
+            opacity: 1 !important;
+        }
+    </style>
 </body>
 </html>
-
-<style>
-    .hover-glass:hover {
-        background: rgba(255, 255, 255, 0.05);
-    }
-</style>
