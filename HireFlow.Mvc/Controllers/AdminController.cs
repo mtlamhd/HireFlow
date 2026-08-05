@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using HireFlow.Business.Authentications.Constants;
 using HireFlow.Business.Exceptionss;
+using HireFlow.Domain.Dtos.EmailDto;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
 using HireFlow.Domain.Interfaces.Repo;
 using Microsoft.AspNetCore.Authorization;
@@ -181,5 +182,210 @@ namespace HireFlow.Mvc.Controllers;
                 TempData["Error"] = ex.Message;
             }
             return RedirectToAction(nameof(JobSeekers));
+        }
+        [HttpGet]
+                public async Task<IActionResult> JobAds()
+                {
+                    try
+                    {
+                        var jobAds = await _adminService.GetAllJobAdsForAdminAsync();
+                        return View(jobAds);
+                    }
+                    catch (BaseAppException ex)
+                    {
+                        TempData["Error"] = ex.Message;
+                        return RedirectToAction(nameof(Dashboard));
+                    }
+                }
+        
+                [HttpGet]
+                public async Task<IActionResult> JobAdDetails(Guid id)
+                {
+                    try
+                    {
+                        var details = await _adminService.GetJobAdDetailsForAdminAsync(id);
+                        return View(details);
+                    }
+                    catch (BaseAppException ex)
+                    {
+                        TempData["Error"] = ex.Message;
+                        return RedirectToAction(nameof(JobAds));
+                    }
+                }
+        
+                [HttpPost]
+                public async Task<IActionResult> ActivateJobAd(Guid id)
+                {
+                    try
+                    {
+                        var adminId = GetCurrentAdminId();
+                        await _adminService.ActivateJobAdAsync(id, adminId);
+                        TempData["Message"] = "آگهی استخدام با موفقیت فعال شد. 🟢";
+                    }
+                    catch (BaseAppException ex)
+                    {
+                        TempData["Error"] = ex.Message;
+                    }
+                    return RedirectToAction(nameof(JobAds));
+                }
+        
+                [HttpPost]
+                public async Task<IActionResult> DeactivateJobAd(Guid id)
+                {
+                    try
+                    {
+                        var adminId = GetCurrentAdminId();
+                        await _adminService.DeactivateJobAdAsync(id, adminId);
+                        TempData["Message"] = "آگهی استخدام غیرفعال شد. 🔴";
+                    }
+                    catch (BaseAppException ex)
+                    {
+                        TempData["Error"] = ex.Message;
+                    }
+                    return RedirectToAction(nameof(JobAds));
+                }
+        
+                [HttpPost]
+                public async Task<IActionResult> SoftDeleteJobAd(Guid id)
+                {
+                    try
+                    {
+                        var adminId = GetCurrentAdminId();
+                        await _adminService.SoftDeleteJobAdAsync(id, adminId);
+                        TempData["Message"] = "آگهی استخدام با موفقیت حذف (Soft Delete) شد. 🗑️";
+                    }
+                    catch (BaseAppException ex)
+                    {
+                        TempData["Error"] = ex.Message;
+                    }
+                    return RedirectToAction(nameof(JobAds));
+                }
+        
+                [HttpPost]
+                public async Task<IActionResult> MakeFeatured(Guid id, DateTime featuredUntil)
+                {
+                    try
+                    {
+                        var adminId = GetCurrentAdminId();
+                        await _adminService.MakeJobAdFeaturedAsync(id, featuredUntil, adminId);
+                        TempData["Message"] = "آگهی مورد نظر با موفقیت ویژه (Featured) شد. ⭐";
+                    }
+                    catch (BaseAppException ex)
+                    {
+                        TempData["Error"] = ex.Message;
+                    }
+                    return RedirectToAction(nameof(JobAds));
+                }
+        
+                [HttpPost]
+                public async Task<IActionResult> CancelFeatured(Guid id)
+                {
+                    try
+                    {
+                        var adminId = GetCurrentAdminId();
+                        await _adminService.CancelJobAdFeaturedAsync(id, adminId);
+                        TempData["Message"] = "وضعیت ویژه (Featured) آگهی لغو شد.";
+                    }
+                    catch (BaseAppException ex)
+                    {
+                        TempData["Error"] = ex.Message;
+                    }
+                    return RedirectToAction(nameof(JobAds));
+                }
+             [HttpGet]
+        public async Task<IActionResult> EmailTemplates()
+        {
+            try
+            {
+                var templates = await _adminService.GetAllEmailTemplatesAsync();
+                return View(templates);
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Dashboard));
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditEmailTemplate(Guid id)
+        {
+            try
+            {
+                var template = await _adminService.GetEmailTemplateByIdAsync(id);
+                var updateDto = new UpdateEmailTemplateDto 
+                { 
+                    Subject = template.Subject, 
+                    Body = template.Body 
+                };
+                ViewBag.TemplateId = template.Id;
+                ViewBag.TypeName = template.TypeName; 
+                return View(updateDto);
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(EmailTemplates));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditEmailTemplate(Guid id, UpdateEmailTemplateDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                var template = await _adminService.GetEmailTemplateByIdAsync(id);
+                ViewBag.TemplateId = id;
+                ViewBag.TypeName = template?.TypeName ?? string.Empty;
+                return View(dto);
+            }
+
+            try
+            {
+                var adminId = GetCurrentAdminId();
+                await _adminService.UpdateEmailTemplateAsync(id, dto, adminId);
+                TempData["Message"] = "قالب ایمیل با موفقیت به‌روزرسانی شد. ✉️";
+                return RedirectToAction(nameof(EmailTemplates));
+            }
+            catch (BaseAppException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                var template = await _adminService.GetEmailTemplateByIdAsync(id);
+                ViewBag.TemplateId = id;
+                ViewBag.TypeName = template?.TypeName ?? string.Empty;
+                return View(dto);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ActivateEmailTemplate(Guid id)
+        {
+            try
+            {
+                var adminId = GetCurrentAdminId();
+                await _adminService.ActivateEmailTemplateAsync(id, adminId);
+                TempData["Message"] = "ارسال ایمیل برای این رویداد فعال شد. 🟢";
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(EmailTemplates));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeactivateEmailTemplate(Guid id)
+        {
+            try
+            {
+                var adminId = GetCurrentAdminId();
+                await _adminService.DeactivateEmailTemplateAsync(id, adminId);
+                TempData["Message"] = "ارسال ایمیل برای این رویداد غیرفعال شد. 🔴";
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(EmailTemplates));
         }
     }

@@ -213,7 +213,7 @@ namespace HireFlow.Mvc.Controllers
             }
         }
 
-        // --- ۶. حذف عکس پروفایل ---
+       
         [HttpPost]
         public async Task<IActionResult> RemoveProfileImage()
         {
@@ -259,7 +259,7 @@ namespace HireFlow.Mvc.Controllers
                 {
                     errorMsg = "⚠️ برای ارسال درخواست، ابتدا باید رزومه PDF خود را در پنل کاربری آپلود کنید!";
                 }
-                // 👇 اضافه شدن ترجمه خطای غیرفعال بودن حساب کاربری
+           
                 else if (errorMsg.Contains("deactivated", StringComparison.OrdinalIgnoreCase) || errorMsg.Contains("deactivate", StringComparison.OrdinalIgnoreCase))
                 {
                     errorMsg = "⚠️ حساب کاربری شما توسط ادمین غیرفعال شده است. امکان ارسال درخواست همکاری وجود ندارد.";

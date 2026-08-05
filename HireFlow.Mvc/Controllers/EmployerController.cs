@@ -44,7 +44,7 @@ namespace HireFlow.Mvc.Controllers
             _requestService = requestService;
         }
 
-        // واکشی امن شناسه کاربر لاگین شده از Claim ها
+       
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -54,9 +54,7 @@ namespace HireFlow.Mvc.Controllers
             return Guid.Parse(userIdClaim);
         }
 
-        // =========================================================================
-        // بخش ۱: مشخصات فردی کارفرما (Personal Profile) - همیشه باز است
-        // =========================================================================
+       
 
         [HttpGet]
         public async Task<IActionResult> Profile()
@@ -169,9 +167,7 @@ namespace HireFlow.Mvc.Controllers
             return RedirectToAction(nameof(Profile));
         }
 
-        // =========================================================================
-        // بخش ۲: مدیریت اطلاعات شرکت (Company) - قفل ویرایش در وضعیت عدم تایید
-        // =========================================================================
+        
 
         [HttpGet]
         public async Task<IActionResult> Company()
@@ -210,14 +206,14 @@ namespace HireFlow.Mvc.Controllers
             var userId = GetCurrentUserId();
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
-            // گارد تایید ادمین برای عملیات ذخیره‌سازی شرکت
+          
             if (user == null || !user.IsApproved)
             {
                 TempData["Error"] = "⚠️ حساب کاربری شما هنوز توسط ادمین تایید نشده است. امکان ویرایش اطلاعات شرکت وجود ندارد.";
                 return RedirectToAction(nameof(Company));
             }
 
-            // نرمال‌سازی هوشمند فیلد وب‌سایت قبل از اجرای ولیدیشن
+           
             if (!string.IsNullOrWhiteSpace(model.Website))
             {
                 var trimmed = model.Website.Trim();
@@ -333,9 +329,7 @@ namespace HireFlow.Mvc.Controllers
             ViewBag.IsApproved = user?.IsApproved ?? false;
         }
 
-        // =========================================================================
-        // بخش ۳: مدیریت آگهی‌های استخدامی (Job Ads) - قفل مطلق در صورت عدم تایید
-        // =========================================================================
+        
 
         [HttpGet]
         public async Task<IActionResult> JobAds()
@@ -343,7 +337,7 @@ namespace HireFlow.Mvc.Controllers
             var userId = GetCurrentUserId();
             var user = await _userManager.FindByIdAsync(userId.ToString());
             
-            // گارد ورود به صفحه لیست آگهی‌ها
+          
             if (user == null || !user.IsApproved)
             {
                 TempData["Error"] = "⚠️ حساب کاربری شما هنوز توسط ادمین تایید نشده است. امکان دسترسی به مدیریت آگهی‌ها وجود ندارد.";
@@ -463,10 +457,10 @@ namespace HireFlow.Mvc.Controllers
                 {
                     Title = model.Title,
                     Description = model.Description,
-                    CityId = model.CityId.Value,                  // 👈 اضافه کردن .Value
-                    CategoryId = model.CategoryId.Value,          // 👈 اضافه کردن .Value
+                    CityId = model.CityId.Value,                   
+                    CategoryId = model.CategoryId.Value,         
                     Salary = model.Salary,
-                    EmploymentType = model.EmploymentType.Value,  // 👈 اضافه کردن .Value
+                    EmploymentType = model.EmploymentType.Value,  
                     SkillIds = model.SkillIds
                 };
 
@@ -544,10 +538,10 @@ namespace HireFlow.Mvc.Controllers
                 {
                     Title = model.Title,
                     Description = model.Description,
-                    CityId = model.CityId.Value,                  // 👈 اضافه کردن .Value
-                    CategoryId = model.CategoryId.Value,          // 👈 اضافه کردن .Value
+                    CityId = model.CityId.Value,                 
+                    CategoryId = model.CategoryId.Value,          
                     Salary = model.Salary,
-                    EmploymentType = model.EmploymentType.Value,  // 👈 اضافه کردن .Value
+                    EmploymentType = model.EmploymentType.Value, 
                     SkillIds = model.SkillIds
                 };
 
@@ -613,7 +607,7 @@ namespace HireFlow.Mvc.Controllers
             try
             {
                 var requests = await _requestService.GetJobAdRequestsAsync(userId, jobAdId);
-                ViewBag.JobAdId = jobAdId; // برای بازگشت به صفحه قبلی
+                ViewBag.JobAdId = jobAdId; 
                 return View(requests);
             }
             catch (BaseAppException ex)
@@ -674,7 +668,7 @@ namespace HireFlow.Mvc.Controllers
                 TempData["Error"] = "خطایی در تغییر وضعیت درخواست رخ داد.";
             }
 
-            // بازگشت به صفحه جزئیات درخواست یا لیست درخواست‌های آن آگهی
+           
             return RedirectToAction(nameof(RequestDetails), new { id = requestId });
         }
     }

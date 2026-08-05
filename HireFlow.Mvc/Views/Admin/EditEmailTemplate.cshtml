@@ -1,0 +1,75 @@
+@model HireFlow.Domain.Dtos.EmailDto.UpdateEmailTemplateDto
+@{
+    ViewData["Title"] = "ویرایش قالب ایمیل";
+    var typeName = ViewBag.TypeName;
+    var templateId = ViewBag.TemplateId;
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container" style="max-width: 800px;">
+        
+        <!-- هدر -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">👑 ویرایش قالب ایمیل</span>
+                <h1 class="fw-bold text-white mb-0">تنظیمات متن و موضوع ایمیل سیستمی</h1>
+            </div>
+            <a asp-action="EmailTemplates" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">← بازگشت به لیست قالب‌ها</a>
+        </div>
+
+        <!-- پیام‌ها -->
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+            
+            <div class="mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                <span class="text-secondary small d-block mb-1">نوع رویداد سیستمی:</span>
+                <h4 class="fw-bold text-info mb-0">@typeName</h4>
+            </div>
+
+            <form asp-action="EditEmailTemplate" method="post">
+                <input type="hidden" name="id" value="@templateId" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-4 p-3 bg-danger bg-opacity-10 rounded-4"></div>
+
+                <div class="mb-4">
+                    <label class="form-label small text-secondary fw-bold">موضوع ایمیل (Subject) <span class="text-danger">*</span></label>
+                    <input asp-for="Subject" class="form-control bg-dark text-white border-0 py-2.5 rounded-3 shadow-none neon-input" required />
+                    <span asp-validation-for="Subject" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small text-secondary fw-bold">متن ایمیل (Body - پشتیبانی از تگ‌های HTML و Placeholderها) <span class="text-danger">*</span></label>
+                    <textarea asp-for="Body" class="form-control bg-dark text-white border-0 py-2 rounded-3 shadow-none neon-input" rows="10" required></textarea>
+                    <span asp-validation-for="Body" class="text-danger small mt-1 d-block"></span>
+                    <div class="form-text text-secondary mt-2 small">
+                        💡 راهنما: می‌توانید از تگ‌های HTML مثل &lt;b&gt;، &lt;br&gt; و همچنین Placeholderهایی مثل <code class="text-info">{Name}</code>، <code class="text-info">{CompanyName}</code> و <code class="text-info">{JobTitle}</code> در متن استفاده کنید.
+                    </div>
+                </div>
+
+                <div class="pt-3 border-top border-secondary border-opacity-25 text-end">
+                    <button type="submit" class="btn btn-primary px-5 rounded-3 fw-bold py-3 shadow-lg bg-gradient border-0" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                        ذخیره و به‌روزرسانی قالب ایمیل ✉️
+                    </button>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .neon-input:focus {
+        background: rgba(15, 23, 42, 0.95) !important;
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.25) !important;
+        color: #fff !important;
+    }
+</style>

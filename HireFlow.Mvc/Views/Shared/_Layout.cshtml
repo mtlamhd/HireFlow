@@ -56,8 +56,11 @@
                                 {
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="Dashboard">📊 داشبورد ادمین</a></li>
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="Employers">👑 مدیریت کارفرمایان</a></li>
-                                    <!-- 👇 این خط جدید را اضافه کن -->
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="JobSeekers">🎯 مدیریت کارجویان</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="JobAds">💼 مدیریت آگهی‌ها</a></li>
+    
+                                    <!-- 👇 این خط را برای مدیریت ایمیل‌ها اضافه کن -->
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Admin" asp-action="EmailTemplates">✉️ مدیریت قالب‌های ایمیل</a></li>
                                 }
 
                                 else if (roles.Contains("Employer"))

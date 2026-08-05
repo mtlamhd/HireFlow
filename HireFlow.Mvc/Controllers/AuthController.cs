@@ -54,7 +54,7 @@ public class AuthController : Controller
 
         var roles = await _userManager.GetRolesAsync(user);
 
-        // هدایت بر اساس نقش
+       
         if (roles.Contains(RoleConstants.AdminRoleName))
             return RedirectToAction("Index", "Admin");
         
@@ -127,20 +127,20 @@ public class AuthController : Controller
                 CompanyName = model.CompanyName 
             };
         
-            // ۱. ثبت‌نام و ساخت کاربر و شرکت (حالت IsApproved = false)
+            
             var registerResult = await _authService.RegisterEmployerAsync(dto);
 
-            // ۲. پیدا کردن کاربری که تازه ثبت‌نام کرده برای لاگین خودکار
+         
             var user = await _userManager.FindByIdAsync(registerResult.Id.ToString());
             if (user != null)
             {
-                // ۳. لاگین خودکار کاربر در سیستم (Cookie Authentication)
+                
                 await _signInManager.SignInAsync(user, isPersistent: false);
             }
 
             TempData["Message"] = "ثبت‌نام با موفقیت انجام شد. به پنل خود خوش آمدید (حساب شما در انتظار تایید ادمین است).";
         
-            // ۴. هدایت مستقیم به صفحه پروفایل کارفرما (به جای صفحه Login)
+           
             return RedirectToAction("Profile", "Employer");
         }
         catch (ConflictException)
