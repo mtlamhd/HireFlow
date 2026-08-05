@@ -21,6 +21,9 @@ namespace HireFlow.Mvc.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRequestService _requestService;
 
+        
+        
+        
         public JobSeekerController(
             IJobSeekerProfileService profileService,
             IAttachmentService attachmentService, 
@@ -42,7 +45,7 @@ namespace HireFlow.Mvc.Controllers
             return Guid.Parse(userIdClaim);
         }
 
-        // --- ۱. نمایش صفحه پروفایل (GET) ---
+       
         [HttpGet]
         public async Task<IActionResult> Profile()
         {

@@ -3,6 +3,9 @@
     ViewData["Title"] = "داشبورد مدیریت کل";
 }
 
+<!-- اضافه کردن Chart.js از CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
     <div class="container">
         
@@ -41,122 +44,192 @@
         <!-- بخش اول: آمار کاربران -->
         <h4 class="fw-bold text-white mb-3">👥 آمار کاربران سیستم</h4>
         <div class="row g-4 mb-5">
-            
             <div class="col-md-4">
                 <div class="card border-0 shadow-lg rounded-4 p-4 d-flex flex-row align-items-center justify-content-between" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <div>
                         <span class="text-secondary small d-block mb-1">کل کارجویان ثبت‌نامی</span>
                         <h2 class="fw-bold text-white mb-0">@Model.TotalJobSeekers</h2>
                     </div>
-                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; font-size: 24px; width: 60px; height: 60px;">
-                        🎯
-                    </div>
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; font-size: 24px; width: 60px; height: 60px;">🎯</div>
                 </div>
             </div>
-
             <div class="col-md-4">
                 <div class="card border-0 shadow-lg rounded-4 p-4 d-flex flex-row align-items-center justify-content-between" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <div>
                         <span class="text-secondary small d-block mb-1">کل کارفرمایان ثبت‌نامی</span>
                         <h2 class="fw-bold text-white mb-0">@Model.TotalEmployers</h2>
                     </div>
-                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(249, 115, 22, 0.15); color: #fb923c; font-size: 24px; width: 60px; height: 60px;">
-                        🏢
-                    </div>
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(249, 115, 22, 0.15); color: #fb923c; font-size: 24px; width: 60px; height: 60px;">🏢</div>
                 </div>
             </div>
-
             <div class="col-md-4">
                 <div class="card border-0 shadow-lg rounded-4 p-4 d-flex flex-row align-items-center justify-content-between" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <div>
                         <span class="text-secondary small d-block mb-1">کارفرمایان در انتظار تأیید</span>
                         <h2 class="fw-bold text-warning mb-0">@Model.TotalPendingEmployers</h2>
                     </div>
-                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 24px; width: 60px; height: 60px;">
-                        ⏳
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 24px; width: 60px; height: 60px;">⏳</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📊 بخش نمودارهای گرافیکی (Chart.js) -->
+        <div class="row g-4 mb-5">
+            <!-- نمودار دایره‌ای کاربران -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 h-100" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h5 class="fw-bold text-white mb-4">📊 نسبت توزیع کاربران پلتفرم</h5>
+                    <div class="d-flex justify-content-center align-items-center" style="height: 280px;">
+                        <canvas id="usersChart"></canvas>
                     </div>
                 </div>
             </div>
 
+            <!-- نمودار میله‌ای درخواست‌های همکاری -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 h-100" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h5 class="fw-bold text-white mb-4">📈 وضعیت درخواست‌های همکاری (ماشین حالت)</h5>
+                    <div class="d-flex justify-content-center align-items-center" style="height: 280px;">
+                        <canvas id="requestsChart"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- بخش دوم: آمار آگهی‌های استخدام -->
         <h4 class="fw-bold text-white mb-3">💼 وضعیت آگهی‌های شغلی</h4>
         <div class="row g-4 mb-5">
-            
             <div class="col-md-6">
                 <div class="card border-0 shadow-lg rounded-4 p-4 d-flex flex-row align-items-center justify-content-between" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <div>
                         <span class="text-secondary small d-block mb-1">آگهی‌های فعال و در حال نمایش</span>
                         <h2 class="fw-bold text-success mb-0">@Model.TotalActiveJobAds</h2>
                     </div>
-                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 24px; width: 60px; height: 60px;">
-                        🟢
-                    </div>
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 24px; width: 60px; height: 60px;">🟢</div>
                 </div>
             </div>
-
             <div class="col-md-6">
                 <div class="card border-0 shadow-lg rounded-4 p-4 d-flex flex-row align-items-center justify-content-between" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <div>
                         <span class="text-secondary small d-block mb-1">آگهی‌های غیرفعال یا منقضی</span>
                         <h2 class="fw-bold text-danger mb-0">@Model.TotalInactiveJobAds</h2>
                     </div>
-                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(239, 68, 68, 0.15); color: #f87171; font-size: 24px; width: 60px; height: 60px;">
-                        🔴
-                    </div>
+                    <div class="rounded-4 p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(239, 68, 68, 0.15); color: #f87171; font-size: 24px; width: 60px; height: 60px;">🔴</div>
                 </div>
             </div>
-
         </div>
 
-        <!-- بخش سوم: آمار درخواست‌های همکاری (به تفکیک ماشین حالت) -->
-        <h4 class="fw-bold text-white mb-3">📊 وضعیت درخواست‌های همکاری (ماشین حالت)</h4>
+        <!-- بخش سوم: کارت‌های آماری درخواست‌های همکاری -->
+        <h4 class="fw-bold text-white mb-3">📊 جزئیات عددی درخواست‌های همکاری</h4>
         <div class="row g-4">
-            
             <div class="col-md-4 col-sm-6">
                 <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <span class="text-secondary small d-block mb-2">⏳ در انتظار بررسی (Initial)</span>
                     <h3 class="fw-bold text-info mb-0">@Model.InitialRequestsCount</h3>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-6">
                 <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <span class="text-secondary small d-block mb-2">👁️ در حال بررسی کارفرما</span>
                     <h3 class="fw-bold text-warning mb-0">@Model.UnderReviewRequestsCount</h3>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-6">
                 <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <span class="text-secondary small d-block mb-2">🤝 دعوت به مصاحبه</span>
                     <h3 class="fw-bold text-primary mb-0" style="color: #818cf8 !important;">@Model.InterviewRequestsCount</h3>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-6">
                 <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <span class="text-secondary small d-block mb-2">🎉 پذیرفته شده (Accepted)</span>
                     <h3 class="fw-bold text-success mb-0">@Model.AcceptedRequestsCount</h3>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-6">
                 <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <span class="text-secondary small d-block mb-2">❌ رد شده (Rejected)</span>
                     <h3 class="fw-bold text-danger mb-0">@Model.RejectedRequestsCount</h3>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-6">
                 <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
                     <span class="text-secondary small d-block mb-2">🚫 لغو شده (Cancelled)</span>
                     <h3 class="fw-bold text-secondary mb-0">@Model.CancelledRequestsCount</h3>
                 </div>
             </div>
-
         </div>
 
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // ۱. تنظیمات نمودار توزیع کاربران (Doughnut Chart)
+            const usersCtx = document.getElementById('usersChart').getContext('2d');
+            new Chart(usersCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['کارجویان', 'کارفرمایان تأییدشده', 'کارفرمایان در انتظار'],
+                    datasets: [{
+                        data: [@Model.TotalJobSeekers, @Model.TotalEmployers - @Model.TotalPendingEmployers, @Model.TotalPendingEmployers],
+                        backgroundColor: ['#60a5fa', '#34d399', '#fbbf24'],
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { family: 'Vazirmatn', size: 12 } }
+                        }
+                    }
+                }
+            });
+
+            // ۲. تنظیمات نمودار وضعیت درخواست‌ها (Bar Chart)
+            const requestsCtx = document.getElementById('requestsChart').getContext('2d');
+            new Chart(requestsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['در انتظار', 'بررسی', 'مصاحبه', 'پذیرفته', 'رد شده', 'لغو شده'],
+                    datasets: [{
+                        label: 'تعداد درخواست‌ها',
+                        data: [
+                            @Model.InitialRequestsCount,
+                            @Model.UnderReviewRequestsCount,
+                            @Model.InterviewRequestsCount,
+                            @Model.AcceptedRequestsCount,
+                            @Model.RejectedRequestsCount,
+                            @Model.CancelledRequestsCount
+                        ],
+                        backgroundColor: ['#38bdf8', '#facc15', '#818cf8', '#34d399', '#f87171', '#94a3b8'],
+                        borderRadius: 6,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8', font: { family: 'Vazirmatn', size: 11 } },
+                            grid: { display: false }
+                        },
+                        y: {
+                            ticks: { color: '#94a3b8', font: { family: 'Vazirmatn', size: 11 } },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}
