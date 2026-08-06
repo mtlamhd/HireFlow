@@ -2,6 +2,7 @@ using System.Security.Claims;
 using HireFlow.Business.Authentications.Constants;
 using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.EmailDto;
+using HireFlow.Domain.Entities;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
 using HireFlow.Domain.Interfaces.Repo;
 using Microsoft.AspNetCore.Authorization;
@@ -388,4 +389,108 @@ namespace HireFlow.Mvc.Controllers;
             }
             return RedirectToAction(nameof(EmailTemplates));
         }
+        [HttpGet]
+        public async Task<IActionResult> Management()
+        {
+            try
+            {
+                ViewBag.Categories = await _unitOfWork.Categories.GetAllCategoriesDtoAsync();
+                ViewBag.Skills = await _unitOfWork.Skills.GetAllSkillsAsync();
+                ViewBag.Provinces = await _unitOfWork.Provinces.GetAllProvincesDtoAsync();
+                ViewBag.Cities = await _unitOfWork.Cities.QueryAsync(c => true, new Paging { PageSize = 500 });
+                return View();
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Dashboard));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddCategory(string name)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new InvalidRequestException("نام دسته‌بندی الزامی است.");
+
+                var category = new Category(name.Trim());
+                await _unitOfWork.Categories.AddAsync(category);
+                await _unitOfWork.SaveChangesAsync();
+                TempData["Message"] = "دسته‌بندی شغلی جدید با موفقیت اضافه شد. ✅";
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(Management));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddSkill(string name)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new InvalidRequestException("نام مهارت الزامی است.");
+
+                var skill = new Skill(name.Trim());
+                await _unitOfWork.Skills.AddAsync(skill);
+                await _unitOfWork.SaveChangesAsync();
+                TempData["Message"] = "مهارت تخصصی جدید با موفقیت اضافه شد. ✅";
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(Management));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddProvince(string name)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new InvalidRequestException("نام استان الزامی است.");
+
+                var province = new Province(name.Trim());
+                await _unitOfWork.Provinces.AddAsync(province);
+                await _unitOfWork.SaveChangesAsync();
+                TempData["Message"] = "استان جدید با موفقیت اضافه شد. ✅";
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(Management));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddCity(string name, Guid provinceId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new InvalidRequestException("نام شهر الزامی است.");
+                if (provinceId == Guid.Empty)
+                    throw new InvalidRequestException("انتخاب استان الزامی است.");
+
+                var provinceExists = await _unitOfWork.Provinces.AnyAsync(p => p.Id == provinceId);
+                if (!provinceExists)
+                    throw new ItemNotFoundException("Province", provinceId);
+
+                var city = new City(name.Trim(), provinceId);
+                await _unitOfWork.Cities.AddAsync(city);
+                await _unitOfWork.SaveChangesAsync();
+                TempData["Message"] = "شهر جدید با موفقیت اضافه شد. ✅";
+            }
+            catch (BaseAppException ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(Management));
+        }
     }
+

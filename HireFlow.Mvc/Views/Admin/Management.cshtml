@@ -1,0 +1,159 @@
+@{
+    ViewData["Title"] = "مدیریت اطلاعات پایه سیستم";
+    var categories = ViewBag.Categories as dynamic ?? new List<object>();
+    var skills = ViewBag.Skills as dynamic ?? new List<object>();
+    var provinces = ViewBag.Provinces as dynamic ?? new List<object>();
+    var cities = ViewBag.Cities as List<HireFlow.Domain.Entities.City> ?? new List<HireFlow.Domain.Entities.City>();
+}
+
+<div style="background-color: #0b0f19; min-height: 100vh; color: #f8fafc; padding: 3rem 0;">
+    <div class="container">
+        
+        <!-- هدر صفحه -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-15">
+            <div>
+                <span class="badge px-3 py-2 rounded-pill fw-bold mb-2 shadow-sm" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">👑 پنل مدیریت ادمین</span>
+                <h1 class="fw-bold text-white mb-0">مدیریت اطلاعات پایه (دسته‌بندی، مهارت، استان، شهر)</h1>
+            </div>
+            <a asp-action="Dashboard" class="btn btn-outline-light rounded-pill px-4 py-2 border-0 shadow-sm" style="background: rgba(255,255,255,0.05);">← بازگشت به داشبورد</a>
+        </div>
+
+        <!-- پیام‌های موفقیت یا خطا -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">
+                ✨ @TempData["Message"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-lg mb-4 border-0" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                ⚠️ @TempData["Error"]
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            
+            <!-- ۱. بخش دسته‌بندی‌های شغلی -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 h-100" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h4 class="fw-bold text-white mb-3">📁 دسته‌بندی‌های شغلی</h4>
+                    
+                    <form asp-action="AddCategory" method="post" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="name" class="form-control bg-dark text-white border-0 py-2.5 rounded-start-3 shadow-none" placeholder="نام دسته‌بندی جدید..." required />
+                            <button type="submit" class="btn btn-primary px-4 fw-bold rounded-end-3" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border:0;">افزودن +</button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                        <table class="table table-dark table-hover align-middle mb-0 small" style="background: transparent;">
+                            <tbody>
+                                @foreach (var cat in categories)
+                                {
+                                    <tr>
+                                        <td class="text-white py-2.5">🏷️ @cat.Name</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ۲. بخش مهارت‌های تخصصی -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 h-100" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h4 class="fw-bold text-white mb-3">⚡ مهارت‌های تخصصی</h4>
+                    
+                    <form asp-action="AddSkill" method="post" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="name" class="form-control bg-dark text-white border-0 py-2.5 rounded-start-3 shadow-none" placeholder="نام مهارت جدید (مثلاً React)..." required />
+                            <button type="submit" class="btn btn-primary px-4 fw-bold rounded-end-3" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border:0;">افزودن +</button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                        <table class="table table-dark table-hover align-middle mb-0 small" style="background: transparent;">
+                            <tbody>
+                                @foreach (var skill in skills)
+                                {
+                                    <tr>
+                                        <td class="text-white py-2.5">📌 @skill.Name</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ۳. بخش استان‌ها -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 h-100" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h4 class="fw-bold text-white mb-3">📍 استان‌ها</h4>
+                    
+                    <form asp-action="AddProvince" method="post" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="name" class="form-control bg-dark text-white border-0 py-2.5 rounded-start-3 shadow-none" placeholder="نام استان جدید..." required />
+                            <button type="submit" class="btn btn-primary px-4 fw-bold rounded-end-3" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border:0;">افزودن +</button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                        <table class="table table-dark table-hover align-middle mb-0 small" style="background: transparent;">
+                            <tbody>
+                                @foreach (var prov in provinces)
+                                {
+                                    <tr>
+                                        <td class="text-white py-2.5">📍 @prov.Name</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ۴. بخش شهرها -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 h-100" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06) !important;">
+                    <h4 class="fw-bold text-white mb-3">🏙️ شهرها</h4>
+                    
+                    <form asp-action="AddCity" method="post" class="mb-4">
+                        <div class="vstack gap-2">
+                            <select name="provinceId" class="form-select bg-dark text-white border-0 py-2.5 rounded-3 small shadow-none" required>
+                                <option value="">انتخاب استان...</option>
+                                @foreach (var prov in provinces)
+                                {
+                                    <option value="@prov.Id">@prov.Name</option>
+                                }
+                            </select>
+                            <div class="input-group">
+                                <input type="text" name="name" class="form-control bg-dark text-white border-0 py-2.5 rounded-start-3 shadow-none" placeholder="نام شهر جدید..." required />
+                                <button type="submit" class="btn btn-primary px-4 fw-bold rounded-end-3" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border:0;">افزودن +</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive" style="max-height: 190px; overflow-y: auto;">
+                        <table class="table table-dark table-hover align-middle mb-0 small" style="background: transparent;">
+                            <tbody>
+                                @foreach (var city in cities)
+                                {
+                                    <tr>
+                                        <td class="text-white py-2.5">🏙️ @city.Name</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
