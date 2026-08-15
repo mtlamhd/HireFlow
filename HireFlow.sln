@@ -6,13 +6,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentatio
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{4C4995AE-CE48-4DB8-A8EB-FD983007C90F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrustructure", "Infrustructure", "{0CF2935A-BDDD-4255-9E73-E6F5080C3AF6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{0CF2935A-BDDD-4255-9E73-E6F5080C3AF6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Business", "Business", "{FA275AD0-890B-434E-8210-9FA9E03246D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HireFlow.Domain", "HireFlow.Domain\HireFlow.Domain.csproj", "{5B9D802B-F2E4-4AA2-BD1C-F2B6F4DDCD2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HireFlow.Infrustructure", "HireFlow.Infrustructure\HireFlow.Infrustructure.csproj", "{F9FCA89D-CBDA-427C-8CEC-133914A88E3A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HireFlow.Infrastructure", "HireFlow.Infrastructure\HireFlow.Infrastructure.csproj", "{F9FCA89D-CBDA-427C-8CEC-133914A88E3A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HireFlow.Business", "HireFlow.Business\HireFlow.Business.csproj", "{C2A7970B-886A-4599-BF1D-C3634DAB1DBC}"
 EndProject

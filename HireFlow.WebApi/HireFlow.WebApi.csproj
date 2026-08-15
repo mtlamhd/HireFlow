@@ -17,8 +17,9 @@
 
     <ItemGroup>
       <ProjectReference Include="..\HireFlow.Domain\HireFlow.Domain.csproj" />
-      <ProjectReference Include="..\HireFlow.Infrustructure\HireFlow.Infrustructure.csproj" />
+      <ProjectReference Include="..\HireFlow.Infrastructure\HireFlow.Infrastructure.csproj" />
       <ProjectReference Include="..\HireFlow.Business\HireFlow.Business.csproj" />
     </ItemGroup>
 
 </Project>
+
