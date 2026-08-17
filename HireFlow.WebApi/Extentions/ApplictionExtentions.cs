@@ -1,6 +1,6 @@
 using HireFlow.Business.Authentications.Constants;
 using HireFlow.Domain.Entities;
-using HireFlow.Infrustructure.Data;
+using HireFlow.Infrastructure.Data;
 using HireFlow.WebApi.Configurtions;
 using Microsoft.AspNetCore.Identity;
 

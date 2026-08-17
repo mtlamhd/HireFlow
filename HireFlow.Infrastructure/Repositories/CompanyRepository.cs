@@ -2,10 +2,10 @@ using HireFlow.Domain.Dtos.CategoryDto;
 using HireFlow.Domain.Dtos.CompanyDto;
 using HireFlow.Domain.Entities;
 using HireFlow.Domain.Interfaces.Repo;
-using HireFlow.Infrustructure.Data;
+using HireFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace HireFlow.Infrustructure.Repositories;
+namespace HireFlow.Infrastructure.Repositories;
 
 public class CompanyRepository : GenericRepository<Company> , ICompanyRepository
 {

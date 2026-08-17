@@ -2,7 +2,7 @@ using HireFlow.Domain.Entities;
 using HireFlow.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace HireFlow.Infrustructure.Data;
+namespace HireFlow.Infrastructure.Data;
 
 public class SeedData
 {

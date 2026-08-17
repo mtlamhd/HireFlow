@@ -1,7 +1,8 @@
 using HireFlow.Business;
 using HireFlow.Domain.Entities;
+using HireFlow.Infrastructure;
+using HireFlow.Infrastructure.Data;
 using HireFlow.Infrustructure;
-using HireFlow.Infrustructure.Data;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);

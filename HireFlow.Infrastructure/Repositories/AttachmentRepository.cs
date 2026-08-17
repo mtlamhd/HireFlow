@@ -1,10 +1,10 @@
 using HireFlow.Domain.Dtos.AttachmentDto;
 using HireFlow.Domain.Entities;
 using HireFlow.Domain.Interfaces.Repo;
-using HireFlow.Infrustructure.Data;
+using HireFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace HireFlow.Infrustructure.Repositories;
+namespace HireFlow.Infrastructure.Repositories;
 
 public class AttachmentRepository : GenericRepository<Attachment>, IAttachmentRepository
 {

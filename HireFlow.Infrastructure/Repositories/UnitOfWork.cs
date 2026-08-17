@@ -1,7 +1,7 @@
 using HireFlow.Domain.Interfaces.Repo;
-using HireFlow.Infrustructure.Data;
+using HireFlow.Infrastructure.Data;
 
-namespace HireFlow.Infrustructure.Repositories;
+namespace HireFlow.Infrastructure.Repositories;
 
 public class UnitOfWork : IUnitOfWork
 {

@@ -4,10 +4,10 @@ using HireFlow.Domain.Dtos.JobAdDto;
 using HireFlow.Domain.Dtos.SkillDto;
 using HireFlow.Domain.Entities;
 using HireFlow.Domain.Interfaces.Repo;
-using HireFlow.Infrustructure.Data;
+using HireFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace HireFlow.Infrustructure.Repositories;
+namespace HireFlow.Infrastructure.Repositories;
 
 public class JobAdRepository : GenericRepository<JobAd> , IJobAdRepository
 {
@@ -197,7 +197,7 @@ public class JobAdRepository : GenericRepository<JobAd> , IJobAdRepository
     var query = _dbSet.AsNoTracking()
         .Where(j => j.IsActive && j.ExpireAt > now);
 
-    // اعمال فیلترهای پویا
+   
     if (!string.IsNullOrWhiteSpace(dto.Title))
     {
         query = query.Where(j => j.Title.Contains(dto.Title));
