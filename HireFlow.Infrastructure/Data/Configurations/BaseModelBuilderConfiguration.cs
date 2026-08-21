@@ -2,7 +2,7 @@ using HireFlow.Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HireFlow.Infrustructure.Data.Configurations;
+namespace HireFlow.Infrastructure.Data.Configurations;
 
 public abstract class BaseModelBuilderConfiguration <TEntity> : IEntityTypeConfiguration<TEntity>
     where TEntity : BaseEntity

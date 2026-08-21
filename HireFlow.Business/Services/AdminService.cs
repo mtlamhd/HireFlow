@@ -19,14 +19,16 @@ public class AdminService : IAdminService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAdminDashboardRepository _adminDashboardRepository;
     private readonly IEmailService _emailService;
+    private readonly ICacheService _cacheService;
 
-    public AdminService(UserManager<User> userManager, IUserRepository userRepository, IUnitOfWork unitOfWork, IAdminDashboardRepository adminDashboardRepository, IEmailService emailService)
+    public AdminService(UserManager<User> userManager, IUserRepository userRepository, IUnitOfWork unitOfWork, IAdminDashboardRepository adminDashboardRepository, IEmailService emailService, ICacheService cacheService)
     {
         _userManager = userManager;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _adminDashboardRepository = adminDashboardRepository;
         _emailService = emailService;
+        _cacheService = cacheService;
     }
     //phase 4 appro employer
 
@@ -171,6 +173,7 @@ public class AdminService : IAdminService
         jobAd.Activate(requesterId);
 
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync("jobads:active:page:1:size:10");
     }
     //deactive job-ad
     public async Task DeactivateJobAdAsync(Guid id, Guid requesterId)
@@ -185,6 +188,9 @@ public class AdminService : IAdminService
         jobAd.Deactivate(requesterId);
 
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync("jobads:active:page:1:size:10");
+
+   
     }
     //phase 4 soft delete job - ad 
     public async Task SoftDeleteJobAdAsync(Guid id, Guid requesterId)
@@ -198,8 +204,11 @@ public class AdminService : IAdminService
 
        
         _unitOfWork.JobAds.SoftDelete(jobAd, requesterId);
+        
 
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync("jobads:active:page:1:size:10");
+
     }
     //phase 4 featured
     public async Task MakeJobAdFeaturedAsync(Guid id, DateTime expiresAt, Guid requesterId)
@@ -218,6 +227,8 @@ public class AdminService : IAdminService
         jobAd.MakeFeatured(expiresAt, requesterId);
 
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync("jobads:active:page:1:size:10");
+
     }
     //phase 4 normal job-ad
     public async Task CancelJobAdFeaturedAsync(Guid id, Guid requesterId)
@@ -232,6 +243,8 @@ public class AdminService : IAdminService
         jobAd.CancelFeatured(requesterId);
 
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync("jobads:active:page:1:size:10");
+
     }
     //phase 4 admin dashbord
     public async Task<AdminDashboardStatsDto> GetDashboardStatsAsync()

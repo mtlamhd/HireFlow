@@ -1,3 +1,4 @@
+using System.Text.Json;
 using HireFlow.Business.Exceptionss;
 using HireFlow.Domain.Dtos.JobAdDto;
 using HireFlow.Domain.Entities;
@@ -11,11 +12,13 @@ public class JobAdService : IJobAdService
  {
     private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<User> _userManager;
+    private readonly ICacheService _cacheService;
 
-    public JobAdService(IUnitOfWork unitOfWork, UserManager<User> userManager)
+    public JobAdService(IUnitOfWork unitOfWork, UserManager<User> userManager, ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
+        _cacheService = cacheService;
     }
     public async Task<JobAdDetailsDto> CreateJobAdAsync(Guid userId, CreateJobAdDto dto)
     {
@@ -44,7 +47,8 @@ public class JobAdService : IJobAdService
         var jobAd = await _unitOfWork.JobAds.CreateJobAdAsync(company.Id, dto, uniqueSkillIds);
 
         await _unitOfWork.SaveChangesAsync();
-
+        
+        await _cacheService.RemoveAsync("jobads:active:page:1:size:10");
         
         var detailsDto = await _unitOfWork.JobAds.GetJobAdDetailsAsync(jobAd.Id);
         return detailsDto ?? throw new ItemNotFoundException("JobAd", jobAd.Id);
@@ -81,6 +85,7 @@ public class JobAdService : IJobAdService
 
         
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync("jobads:active:page:1:size:10");
     }
     public async Task DeleteJobAdAsync(Guid userId, Guid jobAdId)
     {
@@ -98,6 +103,7 @@ public class JobAdService : IJobAdService
 
         
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync("jobads:active:page:1:size:10");
     }
     
     public async Task<List<JobAdSummaryDto>> GetMyCompanyJobAdsAsync(Guid userId)
@@ -131,6 +137,7 @@ public class JobAdService : IJobAdService
         jobAd.Deactivate(userId);
         
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync("jobads:active:page:1:size:10");
     }
     public async Task ActivateJobAdAsync(Guid userId, Guid jobAdId)
     {
@@ -144,6 +151,7 @@ public class JobAdService : IJobAdService
         jobAd.Activate(userId);
 
         await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveAsync("jobads:active:page:1:size:10");
     }
     
     private async Task<Company> GetApprovedCompanyAndVerifyOwnershipAsync(Guid userId, Guid? jobAdId = null)
@@ -186,7 +194,19 @@ public class JobAdService : IJobAdService
         if (paging == null)
             throw new InvalidRequestException("Paging parameters cannot be null.");
         
-        return await _unitOfWork.JobAds.GetActiveJobAdsAsync(paging);
+        string cacheKey = $"jobads:active:page:{paging.PageNumber}:size:{paging.PageSize}";
+        var cachedData = await _cacheService.GetAsync<List<PublicJobAdSummaryDto>>(cacheKey);
+    
+       
+        if (cachedData != null)
+        {
+            return cachedData; 
+        }
+        
+        var jobAds =  await _unitOfWork.JobAds.GetActiveJobAdsAsync(paging);
+        
+        await _cacheService.SetAsync(cacheKey, jobAds, TimeSpan.FromMinutes(5));
+        return jobAds;
     }
     public async Task<PublicJobAdDetailsDto> GetPublicJobAdDetailsAsync(Guid id)
     {
@@ -212,10 +232,18 @@ public class JobAdService : IJobAdService
     }
     public async Task<List<PublicJobAdSummaryDto>> SearchActiveJobAdsAsync(JobAdSearchDto dto)
     {
-        if (dto == null)
-            throw new InvalidRequestException("Search parameters cannot be null.");
+        dto ??= new JobAdSearchDto();
+
+        string cacheKey = $"jobads:search:{JsonSerializer.Serialize(dto)}";
 
        
+        var cached = await _cacheService.GetAsync<List<PublicJobAdSummaryDto>>(cacheKey);
+        if (cached is not null)
+        {
+            return cached;
+        }
+
+        
         if (dto.CityId.HasValue && dto.CityId.Value != Guid.Empty)
         {
             var cityExists = await _unitOfWork.Cities.AnyAsync(c => c.Id == dto.CityId.Value);
@@ -223,7 +251,6 @@ public class JobAdService : IJobAdService
                 throw new ItemNotFoundException("City", dto.CityId.Value);
         }
 
-       
         if (dto.CategoryId.HasValue && dto.CategoryId.Value != Guid.Empty)
         {
             var categoryExists = await _unitOfWork.Categories.AnyAsync(c => c.Id == dto.CategoryId.Value);
@@ -231,18 +258,20 @@ public class JobAdService : IJobAdService
                 throw new ItemNotFoundException("Category", dto.CategoryId.Value);
         }
 
-       
         if (dto.SkillIds != null && dto.SkillIds.Any())
         {
             var uniqueSkillIds = dto.SkillIds.Distinct().ToList();
-        
             var validSkillsCount = await _unitOfWork.Skills.CountAsync(s => uniqueSkillIds.Contains(s.Id));
-        
             if (validSkillsCount != uniqueSkillIds.Count)
                 throw new ItemNotFoundException("One or more specified skills were not found.");
         }
 
-       
-        return await _unitOfWork.JobAds.SearchActiveJobAdsAsync(dto);
+        
+        var result = await _unitOfWork.JobAds.SearchActiveJobAdsAsync(dto);
+
+        
+        await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(3));
+
+        return result;
     }
-}
+ }

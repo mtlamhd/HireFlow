@@ -1,13 +1,14 @@
 using HireFlow.Domain.Interfaces.InterfaceOfService;
 using HireFlow.Domain.Interfaces.Repo;
-using HireFlow.Infrustructure.Data;
-using HireFlow.Infrustructure.EmailServices;
-using HireFlow.Infrustructure.Repositories;
+using HireFlow.Infrastructure.Data;
+using HireFlow.Infrastructure.EmailServices;
+using HireFlow.Infrastructure.RedisService;
+using HireFlow.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace HireFlow.Infrustructure;
+namespace HireFlow.Infrastructure;
 
 public static class DependencyInjection
 {
@@ -20,6 +21,13 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
             
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+        });
+
+        services.AddScoped<ICacheService, RedisCacheService>();
+        
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<IJobAdRepository, JobAdRepository>();
         services.AddScoped<IRequestRepository, RequestRepository>();
@@ -28,7 +36,6 @@ public static class DependencyInjection
         services.AddScoped<ICityRepository, CityRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IAttachmentRepository, AttachmentRepository>();
-        services.AddScoped<IJobAdRepository, JobAdRepository>();
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

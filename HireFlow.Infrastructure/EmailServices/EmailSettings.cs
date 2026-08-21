@@ -1,4 +1,4 @@
-namespace HireFlow.Infrustructure.EmailServices;
+namespace HireFlow.Infrastructure.EmailServices;
 
 public class EmailSettings
 {

@@ -2,7 +2,7 @@ using HireFlow.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HireFlow.Infrustructure.Data.Configurations;
+namespace HireFlow.Infrastructure.Data.Configurations;
 
 public class RefreshTokenModelBuilderConfiguration : BaseModelBuilderConfiguration<RefreshToken>
 {

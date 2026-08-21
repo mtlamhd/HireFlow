@@ -1,10 +1,9 @@
 using System.Reflection;
 using HireFlow.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace HireFlow.Infrustructure.Data;
+namespace HireFlow.Infrastructure.Data;
 
 public class AppDbContext : IdentityDbContext<User, Role , Guid>
 {

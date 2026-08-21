@@ -1,12 +1,11 @@
-using Azure.Core;
 using HireFlow.Domain.Dtos.RequestDto;
 using HireFlow.Domain.Enums;
 using HireFlow.Domain.Interfaces.Repo;
-using HireFlow.Infrustructure.Data;
+using HireFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Request = HireFlow.Domain.Entities.Request;
 
-namespace HireFlow.Infrustructure.Repositories;
+namespace HireFlow.Infrastructure.Repositories;
 
 public class RequestRepository : GenericRepository<Request>, IRequestRepository
 {

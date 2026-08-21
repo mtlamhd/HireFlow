@@ -2,10 +2,10 @@ using System.Linq.Expressions;
 using HireFlow.Domain.Abstractions;
 using HireFlow.Domain.Entities;
 using HireFlow.Domain.Interfaces.Repo;
-using HireFlow.Infrustructure.Data;
+using HireFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace HireFlow.Infrustructure.Repositories;
+namespace HireFlow.Infrastructure.Repositories;
 
 public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 {

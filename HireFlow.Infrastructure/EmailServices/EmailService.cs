@@ -1,6 +1,6 @@
 using HireFlow.Domain.Enums;
 using HireFlow.Domain.Interfaces.InterfaceOfService;
-using HireFlow.Infrustructure.Data;
+using HireFlow.Infrastructure.Data;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
-namespace HireFlow.Infrustructure.EmailServices;
+namespace HireFlow.Infrastructure.EmailServices;
 
 public class EmailService : IEmailService
 {

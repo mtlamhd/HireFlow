@@ -1,13 +1,10 @@
-using System.Data;
-using Dapper;
 using HireFlow.Domain.Dtos.AdminDto;
 using HireFlow.Domain.Enums;
 using HireFlow.Domain.Interfaces.Repo;
-using HireFlow.Infrustructure.Data;
-using Microsoft.Data.SqlClient;
+using HireFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace HireFlow.Infrustructure.Repositories;
+namespace HireFlow.Infrastructure.Repositories;
 
 public class AdminDashboardRepository : IAdminDashboardRepository
 {
